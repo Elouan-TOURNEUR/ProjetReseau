@@ -5,6 +5,8 @@
 
 import java.io.*;
 import java.net.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.util.Scanner;
 
 import static java.lang.System.exit;
@@ -15,9 +17,6 @@ public class EchoClient {
         Socket echoSocket; // la socket client
         String ip; // adresse IPv4 du serveur en notation pointée
         int port; // port TCP serveur
-        BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
-        PrintWriter out;
-        BufferedReader in;
         boolean fini = false;
 
         /* Traitement des arguments */
@@ -36,35 +35,42 @@ public class EchoClient {
 
         /* Connexion */
         System.out.println("Essai de connexion à  " + ip + " sur le port " + port + "\n");
+
+        SocketChannel client = null;
+        ByteBuffer buffer = null;
+
         try {
-            echoSocket = new Socket(ip, port);
-            System.err.println("le n° de la socket est : " + echoSocket);
-            /* Initialisation d'agréables flux d'entrée/sortie */
-            out = new PrintWriter(echoSocket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(echoSocket.getInputStream()));
-        } catch (UnknownHostException e) {
+            client = SocketChannel.open(new InetSocketAddress(ip, port));
+            System.err.println("le n° de la socket est : " + client);
+            buffer = ByteBuffer.allocate(256);
+        } catch (IOException e) {
             System.err.println("Connexion: hôte inconnu : " + ip);
             e.printStackTrace();
-            return;
         }
 
         /* Session */
         try {
             String reponseLogin;
             String entreeLogin;
+
             System.out.println("LOGIN pseudo");
             Scanner scan = new Scanner(System.in);
             entreeLogin = scan.nextLine();
-            out.println(entreeLogin);
-            reponseLogin = in.readLine();
-            if ((reponseLogin != null) && (reponseLogin.equals("ERROR LOGIN aborting chatamu protocol"))) {
+
+            client.write(ByteBuffer.wrap(entreeLogin.getBytes())); //out.println(entreeLogin);
+            client.read(buffer); //in.readLine();
+
+            reponseLogin = (buffer != null) ? new String(buffer.array()).trim() : "";
+            if (reponseLogin.equals("ERROR LOGIN aborting chatamu protocol")) {
                 System.out.println(reponseLogin);
-                echoSocket.close();
+                client.close();
                 exit(2);
             }
+
             while (true) {
                 String entreeMessage;
                 String reponseMessage;
+
                 System.out.println("MESSAGE message");
                 entreeMessage = scan.nextLine();
 
@@ -72,21 +78,16 @@ public class EchoClient {
                     break;
                 }
 
-                out.println(entreeMessage);
-                System.out.println(entreeMessage);
-                reponseMessage = in.readLine();
-                System.out.println(reponseMessage);
+                client.write(ByteBuffer.wrap(entreeMessage.getBytes())); //out.println(entreeMessage);
+                client.read(buffer); //reponseMessage = in.readLine();
+                reponseMessage = (buffer != null) ? new String(buffer.array()).trim() : "";
 
-                if ((reponseMessage != null) && (reponseMessage.equals("ERROR chatamu"))) {
+                if (reponseMessage.equals("ERROR chatamu")) {
                     System.out.println(reponseMessage);
                 }
             }
 
-
-            in.close();
-            out.close();
-            stdin.close();
-            echoSocket.close();
+            client.close();
             System.err.println("Fin de la session.");
         } catch (IOException e) {
             System.err.println("Erreur E/S socket");

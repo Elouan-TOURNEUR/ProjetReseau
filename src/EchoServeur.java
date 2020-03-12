@@ -3,9 +3,7 @@
    Bilel Derbel, Emmanuel Godard
 */
 
-import jdk.swing.interop.SwingInterOpUtils;
 
-import java.awt.datatransfer.SystemFlavorMap;
 import java.io.IOException;
 import java.net.*;
 import java.nio.channels.SelectionKey;
@@ -17,7 +15,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.*;
 import java.nio.*;
-import java.lang.Thread;
 
 class EchoServer {
 
@@ -45,49 +42,51 @@ class EchoServer {
 
         Selector select = Selector.open();
         ssc.register(select, SelectionKey.OP_ACCEPT);
+        ByteBuffer buffer = ByteBuffer.allocate(128);
 
         while(true){
             select.select();
             Iterator<SelectionKey> keys = select.selectedKeys().iterator();
 
             while(keys.hasNext()){
-                System.out.println("debut");
                 SelectionKey key = keys.next();
 
                 if(key.isReadable()){
-                    System.out.println("isReadable");
                     SocketChannel chan = (SocketChannel) key.channel();
                     chan.configureBlocking(false);
-                    ByteBuffer buffer = ByteBuffer.allocate(128);
 
-                    chan.read(buffer);
-                    buffer.flip();
+                    try{
+                        chan.read(buffer);
+                    } catch (IOException e){
+                        chan.close();
+                        break;
+                    }
+                    ByteBuffer msg = buffer.flip();
 
-                    String entree = new String(buffer.array()).trim();
+                    String entree = new String(msg.array()).trim();
+                    //String entree = new String(buffer.array()).trim();
 
                     //System.out.println(chan.socket().getPort());
                     if(map.containsKey(chan.socket().getPort())) {
-                        System.out.println("entree traiterMessage");
                         traiterMessage(entree, chan);
                     }
                     else{
-                        System.out.println("entree login");
                         traiterLogin(entree, chan);
                     }
 
-                    buffer.clear();
+                    //buffer.clear();
+                    buffer = ByteBuffer.allocate(128);
 
-                    chan.register(select, SelectionKey.OP_READ);
-                    chan.close();
+                    //chan.register(select, SelectionKey.OP_READ);
+                    //chan.close();
 
                 } else if(key.isAcceptable()){
                     SocketChannel csc = ssc.accept();
-                    System.out.println("isAcceptable");
                     csc.configureBlocking(false);
                     csc.register(select, SelectionKey.OP_READ);
                     //csc.register(select, SelectionKey.OP_WRITE);
                 }
-                System.out.println("remove");
+
                 keys.remove();
             }
         }
@@ -128,10 +127,9 @@ class EchoServer {
     }
 
     private static String recupererContenuMessage(String entree){
-        String[] entrees = entree.split(" ");
-        entrees[0] = "";
+        String[] entrees = entree.split(" ", 2);
 
-        return Arrays.toString(entrees);
+        return entrees[1];
     }
 
     private static boolean verifierConnexion(String entree){
