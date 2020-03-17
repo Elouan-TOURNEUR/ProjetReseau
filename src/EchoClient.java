@@ -1,8 +1,12 @@
 import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.Iterator;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static java.lang.System.exit;
 
@@ -29,7 +33,7 @@ public class EchoClient {
         }
 
         /* Connexion */
-        System.out.println("Essai de connexion à  " + ip + " sur le port " + port + "\n");
+        System.out.println("Essai de connexion à  " + ip + " sur le port " + port + "\n");
 
         SocketChannel client = null;
         ByteBuffer buffer = null;
@@ -76,10 +80,17 @@ public class EchoClient {
 
                 client.write(ByteBuffer.wrap(entreeMessage.getBytes())); //out.println(entreeMessage);
                 client.read(buffer); //reponseMessage = in.readLine();
+                buffer.flip();
+
                 reponseMessage = (buffer != null) ? new String(buffer.array()).trim() : "";
                 if (reponseMessage.equals("ERROR chatamu")) {
                     System.out.println(reponseMessage);
                 }
+
+                System.out.println(reponseMessage);
+
+                //buffer.clear();
+                buffer = ByteBuffer.allocate(128);
             }
 
             client.close();

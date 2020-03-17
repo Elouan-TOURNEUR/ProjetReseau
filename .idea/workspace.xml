@@ -2,10 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ChatamuCentral.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ChatamuCentral.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/EchoClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/EchoClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/EchoServeur.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/EchoServeur.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -38,9 +37,17 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Compound.Salon">
-    <configuration name="0 EchoServer" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="EchoServer" />
+  <component name="RunManager" selected="Compound.Serveur central">
+    <configuration name="0 Salon central" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="SalonCentral" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="12345" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="0 Serveur central" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="ChatamuCentral" />
       <module name="Projet_Reseaux" />
       <option name="PROGRAM_PARAMETERS" value="12345" />
       <method v="2">
@@ -71,26 +78,35 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Salon" type="CompoundRunConfigurationType">
+    <configuration name="Salon central" type="CompoundRunConfigurationType">
       <toRun name="EchoClient 2" type="Application" />
       <toRun name="EchoClient 3" type="Application" />
       <toRun name="EchoClient 1" type="Application" />
-      <toRun name="EchoServer" type="Application" />
+      <toRun name="0 EchoServer" type="Application" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Serveur central" type="CompoundRunConfigurationType">
+      <toRun name="0 Serveur central" type="Application" />
+      <toRun name="EchoClient 2" type="Application" />
+      <toRun name="EchoClient 1" type="Application" />
+      <toRun name="EchoClient 3" type="Application" />
       <method v="2" />
     </configuration>
     <configuration default="true" type="CompoundRunConfigurationType">
+      <toRun name="0 Serveur central" type="Application" />
       <toRun name="EchoClient 2" type="Application" />
-      <toRun name="EchoClient 3" type="Application" />
       <toRun name="EchoClient 1" type="Application" />
-      <toRun name="EchoServer" type="Application" />
+      <toRun name="EchoClient 3" type="Application" />
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Application.0 EchoServer" />
+      <item itemvalue="Application.0 Salon central" />
       <item itemvalue="Application.EchoClient 1" />
       <item itemvalue="Application.EchoClient 2" />
       <item itemvalue="Application.EchoClient 3" />
-      <item itemvalue="Compound.Salon" />
+      <item itemvalue="Application.0 Serveur central" />
+      <item itemvalue="Compound.Serveur central" />
+      <item itemvalue="Compound.Salon central" />
     </list>
   </component>
   <component name="SvnConfiguration">
@@ -103,7 +119,9 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1584003463172</updated>
-      <workItem from="1584003464481" duration="3909000" />
+      <workItem from="1584003464481" duration="4025000" />
+      <workItem from="1584116361517" duration="231000" />
+      <workItem from="1584475936396" duration="8694000" />
     </task>
     <servers />
   </component>
@@ -115,7 +133,9 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>

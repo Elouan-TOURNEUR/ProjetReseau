@@ -66,9 +66,11 @@ public class ChatamuCentral {
 
             while(keys.hasNext()){
                 SelectionKey key = keys.next();
+
                 if(key.isReadable()){
                     SocketChannel chan = (SocketChannel) key.channel();
                     chan.configureBlocking(false);
+
                     try{
                         chan.read(buffer);
                     } catch (IOException e){
@@ -76,36 +78,10 @@ public class ChatamuCentral {
                         break;
                     }
                     ByteBuffer msg = buffer.flip();
-
                     String entree = new String(msg.array()).trim();
 
                     if(map.containsKey(chan.socket().getPort())) {
-                        //traiterMessage(entree, chan);
-                        if(!verifierMessage(entree)){
-                            chan.write(ByteBuffer.wrap("ERROR chatamu".getBytes()));
-                            supprimerFileAttente(chan);
-                        } else{
-                            int portSocket = chan.socket().getPort();
-                            String pseudo = map.get(portSocket);
-                            String messsage = recupererContenuMessage(entree);
-
-                            String messageTraite = pseudo + "> " + messsage ;
-                            //ajouterListes(messageTraite, portSocket);
-                            System.out.println(pseudo + "> " + messsage);
-                            for (ConcurrentLinkedQueue file : listeFileAttente) {
-                                /* Que sur les autres files*/
-                                if(filesAttentes.get(portSocket) != file) {
-                                    file.add(messageTraite);
-                                    /* On récupère le SocketChannel de la file d'attente */
-                                    SocketChannel channel = getChan(file) ;
-                                    channel.configureBlocking(false) ;
-                                    /* On le met en mode write car le serveur renvoie dans la socket du client les messages de la file */
-                                    channel.register(select, SelectionKey.OP_WRITE) ;
-                                }
-                            }
-
-                            chan.write(ByteBuffer.wrap("OK".getBytes()));
-                        }
+                        traiterMessage(entree, chan, select);
                     }
                     else{
                         traiterLogin(entree, chan);
@@ -117,13 +93,22 @@ public class ChatamuCentral {
                     csc.configureBlocking(false);
                     csc.register(select, SelectionKey.OP_READ);
 
-                } else if (key.isReadable()){
+                } else if (key.isWritable()){
                     SocketChannel chan = (SocketChannel) key.channel();
+                    chan.configureBlocking(false);
+
                     /* On récupère la file d'attente */
-                    ConcurrentLinkedQueue fileAttente = filesAttentes.get(chan) ;
+                    ConcurrentLinkedQueue fileAttente = filesAttentes.get(chan);
+                    if(fileAttente == null) break;
+
                     /* On récupère le premier message de la file d'attente et on le supprime grace à poll() */
-                    String message = fileAttente.poll().toString() ;
-                    chan.write(ByteBuffer.wrap(message.getBytes())) ;
+                    String message = (String)fileAttente.poll();
+
+                    if(message != null)
+                        chan.write(ByteBuffer.wrap(message.getBytes()));
+
+                    /* On repasse le canal en lecture */
+                    chan.register(select, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
                 }
 
                 keys.remove();
@@ -141,7 +126,7 @@ public class ChatamuCentral {
         return null ;
     }
 
-    private static void traiterMessage(String entree, SocketChannel chan) throws IOException {
+    private static void traiterMessage(String entree, SocketChannel chan, Selector select) throws IOException {
 
         if(!verifierMessage(entree)){
             chan.write(ByteBuffer.wrap("ERROR chatamu".getBytes()));
@@ -152,9 +137,19 @@ public class ChatamuCentral {
             String messsage = recupererContenuMessage(entree);
 
             String messageTraite = pseudo + "> " + messsage ;
-            ajouterListes(messageTraite, chan);
-
-            //System.out.println(pseudo + "> " + messsage);
+            //ajouterListes(messageTraite, portSocket);
+            System.out.println(pseudo + "> " + messsage);
+            for (ConcurrentLinkedQueue file : listeFileAttente) {
+                /* Que sur les autres files*/
+                if(! filesAttentes.get(chan).equals(file)) {
+                    file.add(messageTraite + "\n");
+                    /* On récupère le SocketChannel de la file d'attente */
+                    SocketChannel channel = getChan(file) ;
+                    channel.configureBlocking(false) ;
+                    /* On le met en mode write car le serveur renvoie dans la socket du client les messages de la file */
+                    channel.register(select, SelectionKey.OP_WRITE | SelectionKey.OP_READ) ;
+                }
+            }
 
             chan.write(ByteBuffer.wrap("OK".getBytes()));
         }
@@ -202,7 +197,7 @@ public class ChatamuCentral {
     private static void ajouterListes(String message, SocketChannel socketChannel){
         for (ConcurrentLinkedQueue file : listeFileAttente) {
             /* Que sur les autres files*/
-            if(filesAttentes.get(socketChannel) != file)
+            if(! filesAttentes.get(socketChannel).equals(file))
                 file.add(message) ;
         }
     }
