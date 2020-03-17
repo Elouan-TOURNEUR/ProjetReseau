@@ -1,8 +1,3 @@
-/*  echo / client simple
-    Master Informatique 2012 -- Université Aix-Marseille
-    Emmanuel Godard - Bilel Derbel
-*/
-
 import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
@@ -66,6 +61,7 @@ public class EchoClient {
                 client.close();
                 exit(2);
             }
+            buffer.clear();
 
             while (true) {
                 String entreeMessage;
@@ -81,7 +77,6 @@ public class EchoClient {
                 client.write(ByteBuffer.wrap(entreeMessage.getBytes())); //out.println(entreeMessage);
                 client.read(buffer); //reponseMessage = in.readLine();
                 reponseMessage = (buffer != null) ? new String(buffer.array()).trim() : "";
-
                 if (reponseMessage.equals("ERROR chatamu")) {
                     System.out.println(reponseMessage);
                 }

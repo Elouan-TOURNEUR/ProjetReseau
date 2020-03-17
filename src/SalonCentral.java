@@ -1,22 +1,14 @@
-/* echo / serveur basique
-   Master Informatique 2012 -- Université Aix-Marseille
-   Bilel Derbel, Emmanuel Godard
-*/
-
-
 import java.io.IOException;
 import java.net.*;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.concurrent.*;
 import java.nio.*;
 
-class EchoServer {
+class SalonCentral {
 
     private static HashMap<Integer, String> map = new HashMap<>();
 
