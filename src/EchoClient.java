@@ -6,7 +6,6 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Scanner;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static java.lang.System.exit;
 
@@ -56,8 +55,8 @@ public class EchoClient {
             Scanner scan = new Scanner(System.in);
             entreeLogin = scan.nextLine();
 
-            client.write(ByteBuffer.wrap(entreeLogin.getBytes())); //out.println(entreeLogin);
-            client.read(buffer); //in.readLine();
+            client.write(ByteBuffer.wrap(entreeLogin.getBytes()));
+            client.read(buffer);
 
             reponseLogin = (buffer != null) ? new String(buffer.array()).trim() : "";
             if (reponseLogin.equals("ERROR LOGIN aborting chatamu protocol")) {
@@ -65,36 +64,15 @@ public class EchoClient {
                 client.close();
                 exit(2);
             }
+
             buffer.clear();
 
-            while (true) {
-                String entreeMessage;
-                String reponseMessage;
 
-                System.out.println("MESSAGE message");
-                entreeMessage = scan.nextLine();
+            Thread threadRead = new Thread(new ReadMessages(client));
+            Thread threadWrite = new Thread(new WriteMessages(client));
+            threadRead.start();
+            threadWrite.start();
 
-                if(entreeMessage.equals("exit")){
-                    break;
-                }
-
-                client.write(ByteBuffer.wrap(entreeMessage.getBytes())); //out.println(entreeMessage);
-                client.read(buffer); //reponseMessage = in.readLine();
-                buffer.flip();
-
-                reponseMessage = (buffer != null) ? new String(buffer.array()).trim() : "";
-                if (reponseMessage.equals("ERROR chatamu")) {
-                    System.out.println(reponseMessage);
-                }
-
-                System.out.println(reponseMessage);
-
-                //buffer.clear();
-                buffer = ByteBuffer.allocate(128);
-            }
-
-            client.close();
-            System.err.println("Fin de la session.");
         } catch (IOException e) {
             System.err.println("Erreur E/S socket");
             e.printStackTrace();
@@ -102,3 +80,87 @@ public class EchoClient {
         }
     }
 }
+
+class ReadMessages implements Runnable{
+
+    private SocketChannel client;
+
+    public ReadMessages(SocketChannel client){
+        this.client = client;
+    }
+
+    @Override
+    public void run() {
+        ByteBuffer buffer = ByteBuffer.allocate(128);
+        String reponseMessage;
+
+        try {
+            while (true) {
+                client.read(buffer);
+                buffer.flip();
+
+                reponseMessage = (buffer != null) ? new String(buffer.array()).trim() : "";
+                System.out.println(reponseMessage);
+
+                buffer.clear();
+                buffer = ByteBuffer.allocate(128);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            exit(0);
+        }
+    }
+}
+
+
+class WriteMessages implements Runnable{
+
+    private SocketChannel client;
+
+    public WriteMessages(SocketChannel client){
+        this.client = client;
+    }
+
+    @Override
+    public void run() {
+        Scanner scan = new Scanner(System.in);
+        ByteBuffer buffer = ByteBuffer.allocate(128);
+
+        String entreeMessage;
+
+        try {
+            while (true) {
+                System.out.println("MESSAGE message");
+                entreeMessage = scan.nextLine();
+
+                if(entreeMessage.equals("exit")){
+                    client.close();
+                    System.err.println("Fin de la session.");
+                    exit(0);
+                }
+
+
+                client.write(ByteBuffer.wrap(entreeMessage.getBytes()));
+                buffer.flip();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            client.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.err.println("Fin de la session.");
+        exit(0);
+    }
+}
+
+
+
+
+
+

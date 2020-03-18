@@ -130,7 +130,8 @@ public class ChatamuCentral {
 
         if(!verifierMessage(entree)){
             chan.write(ByteBuffer.wrap("ERROR chatamu".getBytes()));
-            supprimerFileAttente(chan);
+            //supprimerFileAttente(chan);
+
         } else{
             int portSocket = chan.socket().getPort();
             String pseudo = map.get(portSocket);
@@ -140,8 +141,10 @@ public class ChatamuCentral {
             //ajouterListes(messageTraite, portSocket);
             System.out.println(pseudo + "> " + messsage);
             for (ConcurrentLinkedQueue file : listeFileAttente) {
+                ConcurrentLinkedQueue f = filesAttentes.get(chan);
+                if (f == null) continue;
                 /* Que sur les autres files*/
-                if(! filesAttentes.get(chan).equals(file)) {
+                if(! f.equals(file)) {
                     file.add(messageTraite + "\n");
                     /* On récupère le SocketChannel de la file d'attente */
                     SocketChannel channel = getChan(file) ;
@@ -151,7 +154,7 @@ public class ChatamuCentral {
                 }
             }
 
-            chan.write(ByteBuffer.wrap("OK".getBytes()));
+            //chan.write(ByteBuffer.wrap("OK".getBytes()));
         }
     }
 
