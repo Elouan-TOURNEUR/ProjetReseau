@@ -47,6 +47,11 @@ public class EchoClient {
         }
 
         /* Session */
+        traiterLogin(client, buffer);
+
+
+    }
+    public static void traiterLogin(SocketChannel client, ByteBuffer buffer){
         try {
             String reponseLogin;
             String entreeLogin;
@@ -64,14 +69,21 @@ public class EchoClient {
                 client.close();
                 exit(2);
             }
+            if (reponseLogin.equals("ERROR LOGIN username")) {
+                System.out.println("Pseudo déja pris.");
+                buffer.clear();
+                traiterLogin(client, buffer);
+            }
+            else {
 
-            buffer.clear();
+                buffer.clear();
 
 
-            Thread threadRead = new Thread(new ReadMessages(client));
-            Thread threadWrite = new Thread(new WriteMessages(client));
-            threadRead.start();
-            threadWrite.start();
+                Thread threadRead = new Thread(new ReadMessages(client));
+                Thread threadWrite = new Thread(new WriteMessages(client));
+                threadRead.start();
+                threadWrite.start();
+            }
 
         } catch (IOException e) {
             System.err.println("Erreur E/S socket");
@@ -134,6 +146,8 @@ class WriteMessages implements Runnable{
                 entreeMessage = scan.nextLine();
 
                 if(entreeMessage.equals("exit")){
+                    System.out.println("c'est la fin j'envoie un dernier message au serveur.");
+                    client.write(ByteBuffer.wrap(entreeMessage.getBytes()));
                     client.close();
                     System.err.println("Fin de la session.");
                     exit(0);
@@ -158,9 +172,3 @@ class WriteMessages implements Runnable{
         exit(0);
     }
 }
-
-
-
-
-
-

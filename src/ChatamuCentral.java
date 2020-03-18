@@ -127,12 +127,13 @@ public class ChatamuCentral {
     }
 
     private static void traiterMessage(String entree, SocketChannel chan, Selector select) throws IOException {
-
-        if(!verifierMessage(entree)){
+        if(entree.equals("exit"))
+            supprimerFileAttente(chan);
+        else if(!verifierMessage(entree)){
             chan.write(ByteBuffer.wrap("ERROR chatamu".getBytes()));
             //supprimerFileAttente(chan);
-
-        } else{
+        }
+        else{
             int portSocket = chan.socket().getPort();
             String pseudo = map.get(portSocket);
             String messsage = recupererContenuMessage(entree);
@@ -162,8 +163,12 @@ public class ChatamuCentral {
 
         if(!verifierConnexion(entree)){
             chan.write(ByteBuffer.wrap("ERROR LOGIN aborting chatamu protocol".getBytes()));
-        } else{
-            String pseudo = recupererContenuLogin(entree) ;
+        }
+        else if(!verifierPseudo(recupererContenuLogin(entree))) {
+            chan.write(ByteBuffer.wrap("ERROR LOGIN username".getBytes()));
+        }
+        else {
+            String pseudo =  recupererContenuLogin(entree) ;
             int portSocket = chan.socket().getPort();
             map.put(portSocket, pseudo);
 
@@ -196,6 +201,15 @@ public class ChatamuCentral {
         return (entree.split(" ")[0].equals("MESSAGE"));
     }
 
+    private static boolean verifierPseudo(String entree) {
+        for (SocketChannel sock : listeSocket) {
+            if (map.get(sock.socket().getPort()).equals(entree)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /* Messages client transmis sur les autres files */
     private static void ajouterListes(String message, SocketChannel socketChannel){
         for (ConcurrentLinkedQueue file : listeFileAttente) {
@@ -216,3 +230,5 @@ public class ChatamuCentral {
         listeSocket.remove(socketChannel) ;
     }
 }
+
+
