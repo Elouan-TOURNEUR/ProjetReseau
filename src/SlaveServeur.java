@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -11,8 +12,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class ChatamuCentral {
-    /*
+public class SlaveServeur {
+/*
 
     Proposer une architecture à base de files d'attente (https://docs.oracle.com/javase/8/docs/api/java/util/Queue.html) associées à chaque client, permettant de
     utiliser ces files en mode producteurs-consommateur
@@ -20,6 +21,8 @@ public class ChatamuCentral {
     il y a un seul consommateur par file, qui renvoie dans la socket du client les messages présents dans la file d'attente associée à ce client donné.
             - On pourra utiliser les implémentations ArrayBlockingQueue<String> ou ConcurrentLinkedQueue<String>.
     */
+
+    private static String name = null ;
 
     /* Map qui associe un port client à un pseudo */
     private static HashMap<Integer, String> map = new HashMap<>();
@@ -33,20 +36,16 @@ public class ChatamuCentral {
     /* Liste qui contient toutes les socketsChannels */
     private static List<SocketChannel> listeSocket = new ArrayList<>() ;
 
-    private static HashMap<String, ArrayList<SocketChannel>> clientsParSalon = new HashMap<>() ;
-
-    private static HashMap<String, String> serveursNames = new HashMap<>() ;
-
-    private static List<String> serveursDisponnibles = new ArrayList<String>() ;
 
     public static void main(String[] args) throws IOException {
         int argc = args.length;
         int port = 0;
 
         /* Traitement des arguments */
-        if (argc == 1) {
+        if (argc == 2) {
             try {
                 port = Integer.parseInt(args[0]);
+                name = args[1] ;
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -54,6 +53,10 @@ public class ChatamuCentral {
             System.out.println("Usage: java EchoServer port");
             System.exit(2);
         }
+        SocketChannel client = SocketChannel.open(new InetSocketAddress(InetAddress.getLocalHost(), 12345));
+        String messageReady = "OPEN " + name + " " + port ;
+        client.write(ByteBuffer.wrap(messageReady.getBytes()));
+
 
         ServerSocketChannel ssc = ServerSocketChannel.open();
         ssc.socket().bind(new InetSocketAddress(port));
@@ -83,9 +86,7 @@ public class ChatamuCentral {
                     }
                     ByteBuffer msg = buffer.flip();
                     String entree = new String(msg.array()).trim();
-                    if(messageDeSalon(entree))
-                        traiterMessageDeSalon(entree) ;
-                    else if(map.containsKey(chan.socket().getPort())) {
+                    if(map.containsKey(chan.socket().getPort())) {
                         traiterMessage(entree, chan, select);
                     }
                     else{
@@ -122,34 +123,6 @@ public class ChatamuCentral {
 
     }
 
-    private static void traiterMessageDeSalon(String entree) {
-        String first = entree.split(" ")[0] ;
-        if (first.equals("OPEN"))
-            traiterOuvertureSalon(entree) ;
-        else
-            traiterFermetureSalon(entree) ;
-    }
-
-    private static void traiterOuvertureSalon(String entree) {
-        String nomSalon = entree.split(" ")[1] ;
-        System.out.println("Le serveur " + nomSalon + " a ouvert.");
-        serveursDisponnibles.add(nomSalon) ;
-        serveursNames.put(nomSalon, entree.split(" ")[2]) ;
-        ArrayList<SocketChannel> salon = new ArrayList<SocketChannel>() ;
-        clientsParSalon.put(nomSalon, salon) ;
-    }
-
-    private static void traiterFermetureSalon(String entree) {
-        String nomSalon = entree.split(" ")[1] ;
-        System.out.println("Le serveur " + nomSalon + " a fermé.");
-        serveursNames.remove(nomSalon, entree.split(" ")[2]) ;
-        serveursDisponnibles.remove(nomSalon) ;
-    }
-
-    private static boolean messageDeSalon(String entree) {
-        return ((entree.split(" ")[0].equals("OPEN") || (entree.split(" ")[0].equals("CLOSE"))) && (entree.split(" ").length == 3)) ;
-
-    }
 
     private static SocketChannel getChan(ConcurrentLinkedQueue fileAttente) {
         for (SocketChannel socketChannel : listeSocket){
@@ -161,20 +134,9 @@ public class ChatamuCentral {
     }
 
     private static void traiterMessage(String entree, SocketChannel chan, Selector select) throws IOException {
-        if(entree.equals("exit")) {
+        if(entree.equals("exit"))
             supprimerFileAttente(chan);
-        }
-        else if ((entree.split(" ")[0].equals("SERVERCONNECT"))){
-            String name = entree.split(" ")[1] ;
-            if (verifierSalon(name)) {
-                clientsParSalon.get(name).add(chan);
-                System.out.println(chan + "ajouté au salon " + name);
-            }
-            else {
-                chan.write(ByteBuffer.wrap("ERROR SERVER".getBytes()));
-            }
-        }
-        else if (!verifierMessage(entree)){
+        else if(!verifierMessage(entree)){
             chan.write(ByteBuffer.wrap("ERROR chatamu".getBytes()));
             //supprimerFileAttente(chan);
         }
@@ -204,14 +166,6 @@ public class ChatamuCentral {
         }
     }
 
-    private static boolean verifierSalon(String name) {
-        for(String salon : serveursDisponnibles){
-            if (salon.equals(name))
-                return true ;
-        }
-        return false ;
-    }
-
     private static void traiterLogin(String entree, SocketChannel chan) throws IOException {
 
         if(!verifierConnexion(entree)){
@@ -231,12 +185,7 @@ public class ChatamuCentral {
             listeFileAttente.add(fileAttenteClient) ;
             listeSocket.add(chan) ;
 
-            String listeSalon = "" ;
-            for (String salon : serveursDisponnibles) {
-                listeSalon += salon + '\n' ;
-            }
-            chan.write(ByteBuffer.wrap(listeSalon.getBytes())) ;
-
+            chan.write(ByteBuffer.wrap("OK".getBytes()));
         }
     }
 

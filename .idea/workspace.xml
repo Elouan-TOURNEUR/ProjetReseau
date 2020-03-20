@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="">
+    <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé">
+      <change afterPath="$PROJECT_DIR$/src/SlaveServeur.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ChatamuCentral.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ChatamuCentral.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/EchoClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/EchoClient.java" afterDir="false" />
@@ -14,6 +15,13 @@
   </component>
   <component name="CoverageViewManager">
     <option name="myElementSize" value="241" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -37,7 +45,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Compound.Serveur central">
+  <component name="RunManager" selected="Compound.Cluster">
     <configuration name="0 Salon central" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="SalonCentral" />
       <module name="Projet_Reseaux" />
@@ -78,6 +86,40 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="SlaveServeur 1" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="SlaveServeur" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="12346 Salon1" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="SlaveServeur 2" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="SlaveServeur" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="12347 Salon2" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="SlaveServeur 3" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="SlaveServeur" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="12348 Salon3" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Cluster" type="CompoundRunConfigurationType">
+      <toRun name="EchoClient 3" type="Application" />
+      <toRun name="0 Serveur central" type="Application" />
+      <toRun name="SlaveServeur 3" type="Application" />
+      <toRun name="EchoClient 2" type="Application" />
+      <toRun name="SlaveServeur 1" type="Application" />
+      <toRun name="EchoClient 1" type="Application" />
+      <toRun name="SlaveServeur 2" type="Application" />
+      <method v="2" />
+    </configuration>
     <configuration name="Salon central" type="CompoundRunConfigurationType">
       <toRun name="EchoClient 2" type="Application" />
       <toRun name="EchoClient 3" type="Application" />
@@ -93,10 +135,13 @@
       <method v="2" />
     </configuration>
     <configuration default="true" type="CompoundRunConfigurationType">
-      <toRun name="0 Serveur central" type="Application" />
-      <toRun name="EchoClient 2" type="Application" />
-      <toRun name="EchoClient 1" type="Application" />
       <toRun name="EchoClient 3" type="Application" />
+      <toRun name="0 Serveur central" type="Application" />
+      <toRun name="SlaveServeur 3" type="Application" />
+      <toRun name="EchoClient 2" type="Application" />
+      <toRun name="SlaveServeur 1" type="Application" />
+      <toRun name="EchoClient 1" type="Application" />
+      <toRun name="SlaveServeur 2" type="Application" />
       <method v="2" />
     </configuration>
     <list>
@@ -105,7 +150,11 @@
       <item itemvalue="Application.EchoClient 2" />
       <item itemvalue="Application.EchoClient 3" />
       <item itemvalue="Application.0 Serveur central" />
+      <item itemvalue="Application.SlaveServeur 2" />
+      <item itemvalue="Application.SlaveServeur 1" />
+      <item itemvalue="Application.SlaveServeur 3" />
       <item itemvalue="Compound.Serveur central" />
+      <item itemvalue="Compound.Cluster" />
       <item itemvalue="Compound.Salon central" />
     </list>
   </component>
@@ -122,7 +171,19 @@
       <workItem from="1584003464481" duration="4025000" />
       <workItem from="1584116361517" duration="231000" />
       <workItem from="1584475936396" duration="14409000" />
+      <workItem from="1584537538523" duration="13566000" />
+      <workItem from="1584616157347" duration="39000" />
+      <workItem from="1584616198449" duration="1000" />
+      <workItem from="1584698513268" duration="21292000" />
     </task>
+    <task id="LOCAL-00001" summary="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé">
+      <created>1584557598849</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1584557598850</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -140,6 +201,10 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé" />
+    <option name="LAST_COMMIT_MESSAGE" value="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ProjetReseau$EchoClient.ic" NAME="EchoClient Coverage Results" MODIFIED="1584006174534" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />

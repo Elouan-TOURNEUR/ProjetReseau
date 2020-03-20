@@ -51,7 +51,8 @@ public class EchoClient {
 
 
     }
-    public static void traiterLogin(SocketChannel client, ByteBuffer buffer){
+
+    public static void traiterLogin(SocketChannel client, ByteBuffer buffer) {
         try {
             String reponseLogin;
             String entreeLogin;
@@ -64,21 +65,49 @@ public class EchoClient {
             client.read(buffer);
 
             reponseLogin = (buffer != null) ? new String(buffer.array()).trim() : "";
+            buffer.clear();
             if (reponseLogin.equals("ERROR LOGIN aborting chatamu protocol")) {
                 System.out.println(reponseLogin);
                 client.close();
                 exit(2);
             }
-            if (reponseLogin.equals("ERROR LOGIN username")) {
+            else if (reponseLogin.equals("ERROR LOGIN username")) {
                 System.out.println("Pseudo déja pris.");
-                buffer.clear();
                 traiterLogin(client, buffer);
+            } else {
+                System.out.println(reponseLogin);
+                traiterServerConnect(client, buffer);
             }
-            else {
 
+        } catch (IOException e) {
+            System.err.println("Erreur E/S socket");
+            e.printStackTrace();
+            exit(8);
+        }
+    }
+
+    private static void traiterServerConnect(SocketChannel client, ByteBuffer buffer) {
+        try {
+            String reponseServerConnect;
+            String entreeServerConnect;
+
+            System.out.println("SERVERCONNECT nom");
+            Scanner scan = new Scanner(System.in);
+            entreeServerConnect = scan.nextLine();
+
+            client.write(ByteBuffer.wrap(entreeServerConnect.getBytes()));
+            buffer.clear();
+            System.out.println(buffer);
+            client.read(buffer);
+
+            reponseServerConnect = (buffer != null) ? new String(buffer.array()).trim() : "";
+            //System.out.println(reponseServerConnect);
+            if (reponseServerConnect.equals("ERROR SERVER")) {
+                System.out.println("Serveur invalide.");
                 buffer.clear();
-
-
+                traiterServerConnect(client, buffer);
+            } else {
+                System.out.println("Vous avez rejoin le server avec succès.");
                 Thread threadRead = new Thread(new ReadMessages(client));
                 Thread threadWrite = new Thread(new WriteMessages(client));
                 threadRead.start();
