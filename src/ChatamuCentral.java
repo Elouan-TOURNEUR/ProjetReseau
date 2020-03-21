@@ -12,20 +12,12 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ChatamuCentral {
-    /*
-
-    Proposer une architecture à base de files d'attente (https://docs.oracle.com/javase/8/docs/api/java/util/Queue.html) associées à chaque client, permettant de
-    utiliser ces files en mode producteurs-consommateur
-    où les producteurs transmettent les messages envoyés par un client sur l'ensemble des autres files d'attentes
-    il y a un seul consommateur par file, qui renvoie dans la socket du client les messages présents dans la file d'attente associée à ce client donné.
-            - On pourra utiliser les implémentations ArrayBlockingQueue<String> ou ConcurrentLinkedQueue<String>.
-    */
 
     /* Map qui associe un port client à un pseudo */
-    private static HashMap<Integer, String> map = new HashMap<>();
+    private static HashMap<Integer, String> clientPseudo = new HashMap<>();
 
     /* Map qui associe un socketChannel à une file d'attente */
-    private static HashMap<SocketChannel, ConcurrentLinkedQueue> filesAttentes = new HashMap<>();
+    private static HashMap<SocketChannel, ConcurrentLinkedQueue> socketChannelFileAttente = new HashMap<>();
 
     /* Liste qui contient toutes les files d'attentes */
     private static List<ConcurrentLinkedQueue> listeFileAttente = new ArrayList<>() ;
@@ -33,10 +25,13 @@ public class ChatamuCentral {
     /* Liste qui contient toutes les socketsChannels */
     private static List<SocketChannel> listeSocket = new ArrayList<>() ;
 
+    /* Map qui associe un nom à une liste de socketsChannels */
     private static HashMap<String, ArrayList<SocketChannel>> clientsParSalon = new HashMap<>() ;
 
+    /* Map qui associe un serveur à un nom */
     private static HashMap<String, String> serveursNames = new HashMap<>() ;
 
+    /* Liste qui contient toutes les serveurs salon */
     private static List<String> serveursDisponnibles = new ArrayList<String>() ;
 
     public static void main(String[] args) throws IOException {
@@ -85,10 +80,13 @@ public class ChatamuCentral {
                     String entree = new String(msg.array()).trim();
                     if(messageDeSalon(entree))
                         traiterMessageDeSalon(entree) ;
-                    else if(map.containsKey(chan.socket().getPort())) {
+                    else if (clientSurAucunServer(chan) && clientPseudo.containsKey(chan.socket().getPort())){
+                        traiterConnexionSalon(entree, chan) ;
+                    }
+                    else if(clientPseudo.containsKey(chan.socket().getPort())) {
                         traiterMessage(entree, chan, select);
                     }
-                    else{
+                    else if (!clientPseudo.containsKey(chan.socket().getPort())){
                         traiterLogin(entree, chan);
                     }
                     buffer = ByteBuffer.allocate(128);
@@ -103,7 +101,7 @@ public class ChatamuCentral {
                     chan.configureBlocking(false);
 
                     /* On récupère la file d'attente */
-                    ConcurrentLinkedQueue fileAttente = filesAttentes.get(chan);
+                    ConcurrentLinkedQueue fileAttente = socketChannelFileAttente.get(chan);
                     if(fileAttente == null) break;
 
                     /* On récupère le premier message de la file d'attente et on le supprime grace à poll() */
@@ -115,11 +113,9 @@ public class ChatamuCentral {
                     /* On repasse le canal en lecture */
                     chan.register(select, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
                 }
-
                 keys.remove();
             }
         }
-
     }
 
     private static void traiterMessageDeSalon(String entree) {
@@ -146,33 +142,53 @@ public class ChatamuCentral {
         serveursDisponnibles.remove(nomSalon) ;
     }
 
-    private static boolean messageDeSalon(String entree) {
-        return ((entree.split(" ")[0].equals("OPEN") || (entree.split(" ")[0].equals("CLOSE"))) && (entree.split(" ").length == 3)) ;
+    private static void traiterLogin(String entree, SocketChannel chan) throws IOException {
+        if(!verifierConnexion(entree)){
+            chan.write(ByteBuffer.wrap("ERROR LOGIN aborting chatamu protocol".getBytes()));
+        }
+        else if(!verifierPseudo(recupererContenuLogin(entree))) {
+            chan.write(ByteBuffer.wrap("ERROR LOGIN username".getBytes()));
+        }
+        else {
+            String pseudo =  recupererContenuLogin(entree) ;
+            int portSocket = chan.socket().getPort();
+            clientPseudo.put(portSocket, pseudo);
 
+            /* A chaque nouveau client on lui associe sa file */
+            ConcurrentLinkedQueue fileAttenteClient = new ConcurrentLinkedQueue() ;
+            socketChannelFileAttente.put(chan, fileAttenteClient) ;
+            listeFileAttente.add(fileAttenteClient) ;
+            listeSocket.add(chan) ;
+
+            String listeSalon = "" ;
+            for (String salon : serveursDisponnibles) {
+                listeSalon += salon + '\n' ;
+            }
+            chan.write(ByteBuffer.wrap(listeSalon.getBytes())) ;
+        }
     }
 
-    private static SocketChannel getChan(ConcurrentLinkedQueue fileAttente) {
-        for (SocketChannel socketChannel : listeSocket){
-            if (filesAttentes.get(socketChannel) == fileAttente){
-                return socketChannel ;
+    private static void traiterConnexionSalon(String entree, SocketChannel chan) throws IOException {
+        if(!verifierCoServeur(entree)){
+            chan.write(ByteBuffer.wrap("ERROR SERVER".getBytes()));
+        }
+        else {
+            String name = entree.split(" ")[1] ;
+            if (verifierSalon(name)) {
+                chan.write(ByteBuffer.wrap("ok".getBytes()));
+                clientsParSalon.get(name).add(chan);
+                String pseudo = clientPseudo.get(chan.socket().getPort()) ;
+                System.out.println(pseudo + " a rejoin le serveur " + name);
+            }
+            else {
+                chan.write(ByteBuffer.wrap("ERROR SERVER NAME".getBytes()));
             }
         }
-        return null ;
     }
 
     private static void traiterMessage(String entree, SocketChannel chan, Selector select) throws IOException {
         if(entree.equals("exit")) {
             supprimerFileAttente(chan);
-        }
-        else if ((entree.split(" ")[0].equals("SERVERCONNECT"))){
-            String name = entree.split(" ")[1] ;
-            if (verifierSalon(name)) {
-                clientsParSalon.get(name).add(chan);
-                System.out.println(chan + "ajouté au salon " + name);
-            }
-            else {
-                chan.write(ByteBuffer.wrap("ERROR SERVER".getBytes()));
-            }
         }
         else if (!verifierMessage(entree)){
             chan.write(ByteBuffer.wrap("ERROR chatamu".getBytes()));
@@ -180,14 +196,14 @@ public class ChatamuCentral {
         }
         else{
             int portSocket = chan.socket().getPort();
-            String pseudo = map.get(portSocket);
+            String pseudo = clientPseudo.get(portSocket);
             String messsage = recupererContenuMessage(entree);
 
             String messageTraite = pseudo + "> " + messsage ;
             //ajouterListes(messageTraite, portSocket);
             System.out.println(pseudo + "> " + messsage);
             for (ConcurrentLinkedQueue file : listeFileAttente) {
-                ConcurrentLinkedQueue f = filesAttentes.get(chan);
+                ConcurrentLinkedQueue f = socketChannelFileAttente.get(chan);
                 if (f == null) continue;
                 /* Que sur les autres files*/
                 if(! f.equals(file)) {
@@ -199,7 +215,6 @@ public class ChatamuCentral {
                     channel.register(select, SelectionKey.OP_WRITE | SelectionKey.OP_READ) ;
                 }
             }
-
             //chan.write(ByteBuffer.wrap("OK".getBytes()));
         }
     }
@@ -212,45 +227,6 @@ public class ChatamuCentral {
         return false ;
     }
 
-    private static void traiterLogin(String entree, SocketChannel chan) throws IOException {
-
-        if(!verifierConnexion(entree)){
-            chan.write(ByteBuffer.wrap("ERROR LOGIN aborting chatamu protocol".getBytes()));
-        }
-        else if(!verifierPseudo(recupererContenuLogin(entree))) {
-            chan.write(ByteBuffer.wrap("ERROR LOGIN username".getBytes()));
-        }
-        else {
-            String pseudo =  recupererContenuLogin(entree) ;
-            int portSocket = chan.socket().getPort();
-            map.put(portSocket, pseudo);
-
-            /* A chaque nouveau client on lui associe sa file */
-            ConcurrentLinkedQueue fileAttenteClient = new ConcurrentLinkedQueue() ;
-            filesAttentes.put(chan, fileAttenteClient) ;
-            listeFileAttente.add(fileAttenteClient) ;
-            listeSocket.add(chan) ;
-
-            String listeSalon = "" ;
-            for (String salon : serveursDisponnibles) {
-                listeSalon += salon + '\n' ;
-            }
-            chan.write(ByteBuffer.wrap(listeSalon.getBytes())) ;
-
-        }
-    }
-
-
-    private static String recupererContenuLogin(String entree){
-        return entree.split(" ")[1] ;
-    }
-
-    private static String recupererContenuMessage(String entree){
-        String[] entrees = entree.split(" ", 2);
-
-        return entrees[1];
-    }
-
     private static boolean verifierConnexion(String entree){
         return (entree.split(" ")[0].equals("LOGIN")) && (entree.split(" ").length == 2) ;
     }
@@ -261,7 +237,7 @@ public class ChatamuCentral {
 
     private static boolean verifierPseudo(String entree) {
         for (SocketChannel sock : listeSocket) {
-            if (map.get(sock.socket().getPort()).equals(entree)) {
+            if (clientPseudo.get(sock.socket().getPort()).equals(entree)) {
                 return false;
             }
         }
@@ -269,15 +245,47 @@ public class ChatamuCentral {
     }
 
     private static boolean verifierCoServeur(String entree){
-        return (entree.split(" ")[0].equals("SERVEURCONNECT")) && (entree.split(" ").length == 2);
+        return (entree.split(" ")[0].equals("SERVERCONNECT")) && (entree.split(" ").length == 2);
     }
 
+    private static boolean messageDeSalon(String entree) {
+        return ((entree.split(" ")[0].equals("OPEN") || (entree.split(" ")[0].equals("CLOSE"))) && (entree.split(" ").length == 3)) ;
+    }
+
+    private static boolean clientSurAucunServer(SocketChannel socketChannel){
+        for(String server : serveursDisponnibles){
+            ArrayList<SocketChannel> clients = clientsParSalon.get(server) ;
+            for(SocketChannel client : clients){
+                if(client.equals(socketChannel))
+                    return false ;
+            }
+        }
+        return true ;
+    }
+
+    private static SocketChannel getChan(ConcurrentLinkedQueue fileAttente) {
+        for (SocketChannel socketChannel : listeSocket){
+            if (socketChannelFileAttente.get(socketChannel) == fileAttente){
+                return socketChannel ;
+            }
+        }
+        return null ;
+    }
+
+    private static String recupererContenuLogin(String entree){
+        return entree.split(" ")[1] ;
+    }
+
+    private static String recupererContenuMessage(String entree){
+        String[] entrees = entree.split(" ", 2);
+        return entrees[1];
+    }
 
     /* Messages client transmis sur les autres files */
     private static void ajouterListes(String message, SocketChannel socketChannel){
         for (ConcurrentLinkedQueue file : listeFileAttente) {
             /* Que sur les autres files*/
-            if(! filesAttentes.get(socketChannel).equals(file))
+            if(! socketChannelFileAttente.get(socketChannel).equals(file))
                 file.add(message) ;
         }
     }
@@ -285,11 +293,10 @@ public class ChatamuCentral {
     /* Lorsqu'un client se déconnecte, on supprime sa file d'attente */
     private static void supprimerFileAttente(SocketChannel socketChannel){
         /* on supprime de la liste */
-        listeFileAttente.remove(filesAttentes.get(socketChannel)) ;
+        listeFileAttente.remove(socketChannelFileAttente.get(socketChannel)) ;
 
         /* on supprime la file d'attente */
-        filesAttentes.remove(socketChannel) ;
-
+        socketChannelFileAttente.remove(socketChannel) ;
         listeSocket.remove(socketChannel) ;
     }
 }

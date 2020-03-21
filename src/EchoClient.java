@@ -1,10 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
 import java.util.Scanner;
 
 import static java.lang.System.exit;
@@ -48,8 +45,6 @@ public class EchoClient {
 
         /* Session */
         traiterLogin(client, buffer);
-
-
     }
 
     public static void traiterLogin(SocketChannel client, ByteBuffer buffer) {
@@ -76,7 +71,7 @@ public class EchoClient {
                 traiterLogin(client, buffer);
             } else {
                 System.out.println(reponseLogin);
-                traiterServerConnect(client, buffer);
+                traiterServerConnect(client);
             }
 
         } catch (IOException e) {
@@ -86,7 +81,9 @@ public class EchoClient {
         }
     }
 
-    private static void traiterServerConnect(SocketChannel client, ByteBuffer buffer) {
+    private static void traiterServerConnect(SocketChannel client) {
+        ByteBuffer buffer = ByteBuffer.allocate(128);
+
         try {
             String reponseServerConnect;
             String entreeServerConnect;
@@ -97,16 +94,18 @@ public class EchoClient {
 
             client.write(ByteBuffer.wrap(entreeServerConnect.getBytes()));
             buffer.clear();
-            System.out.println(buffer);
             client.read(buffer);
 
             reponseServerConnect = (buffer != null) ? new String(buffer.array()).trim() : "";
-            //System.out.println(reponseServerConnect);
             if (reponseServerConnect.equals("ERROR SERVER")) {
-                System.out.println("Serveur invalide.");
+                System.out.println("Syntaxe invalide.");
                 buffer.clear();
-                traiterServerConnect(client, buffer);
-            } else {
+                traiterServerConnect(client);
+            } else if (reponseServerConnect.equals("ERROR SERVER NAME")) {
+                System.out.println("Serveur invalide.");
+                traiterServerConnect(client);
+            }
+            else {
                 System.out.println("Vous avez rejoin le server avec succès.");
                 Thread threadRead = new Thread(new ReadMessages(client));
                 Thread threadWrite = new Thread(new WriteMessages(client));
@@ -181,7 +180,6 @@ class WriteMessages implements Runnable{
                     System.err.println("Fin de la session.");
                     exit(0);
                 }
-
 
                 client.write(ByteBuffer.wrap(entreeMessage.getBytes()));
                 buffer.flip();

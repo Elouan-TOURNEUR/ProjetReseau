@@ -13,22 +13,16 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class SlaveServeur {
-/*
 
-    Proposer une architecture à base de files d'attente (https://docs.oracle.com/javase/8/docs/api/java/util/Queue.html) associées à chaque client, permettant de
-    utiliser ces files en mode producteurs-consommateur
-    où les producteurs transmettent les messages envoyés par un client sur l'ensemble des autres files d'attentes
-    il y a un seul consommateur par file, qui renvoie dans la socket du client les messages présents dans la file d'attente associée à ce client donné.
-            - On pourra utiliser les implémentations ArrayBlockingQueue<String> ou ConcurrentLinkedQueue<String>.
-    */
+
 
     private static String name = null ;
 
     /* Map qui associe un port client à un pseudo */
-    private static HashMap<Integer, String> map = new HashMap<>();
+    private static HashMap<Integer, String> clientPseudo = new HashMap<>();
 
     /* Map qui associe un socketChannel à une file d'attente */
-    private static HashMap<SocketChannel, ConcurrentLinkedQueue> filesAttentes = new HashMap<>();
+    private static HashMap<SocketChannel, ConcurrentLinkedQueue> socketChannelFileAttente = new HashMap<>();
 
     /* Liste qui contient toutes les files d'attentes */
     private static List<ConcurrentLinkedQueue> listeFileAttente = new ArrayList<>() ;
@@ -86,7 +80,7 @@ public class SlaveServeur {
                     }
                     ByteBuffer msg = buffer.flip();
                     String entree = new String(msg.array()).trim();
-                    if(map.containsKey(chan.socket().getPort())) {
+                    if(clientPseudo.containsKey(chan.socket().getPort())) {
                         traiterMessage(entree, chan, select);
                     }
                     else{
@@ -104,7 +98,7 @@ public class SlaveServeur {
                     chan.configureBlocking(false);
 
                     /* On récupère la file d'attente */
-                    ConcurrentLinkedQueue fileAttente = filesAttentes.get(chan);
+                    ConcurrentLinkedQueue fileAttente = socketChannelFileAttente.get(chan);
                     if(fileAttente == null) break;
 
                     /* On récupère le premier message de la file d'attente et on le supprime grace à poll() */
@@ -116,40 +110,51 @@ public class SlaveServeur {
                     /* On repasse le canal en lecture */
                     chan.register(select, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
                 }
-
                 keys.remove();
             }
         }
-
     }
 
 
-    private static SocketChannel getChan(ConcurrentLinkedQueue fileAttente) {
-        for (SocketChannel socketChannel : listeSocket){
-            if (filesAttentes.get(socketChannel) == fileAttente){
-                return socketChannel ;
-            }
+    private static void traiterLogin(String entree, SocketChannel chan) throws IOException {
+        if(!verifierConnexion(entree)){
+            chan.write(ByteBuffer.wrap("ERROR LOGIN aborting chatamu protocol".getBytes()));
         }
-        return null ;
+        else if(!verifierPseudo(recupererContenuLogin(entree))) {
+            chan.write(ByteBuffer.wrap("ERROR LOGIN username".getBytes()));
+        }
+        else {
+            String pseudo =  recupererContenuLogin(entree) ;
+            int portSocket = chan.socket().getPort();
+            clientPseudo.put(portSocket, pseudo);
+
+            /* A chaque nouveau client on lui associe sa file */
+            ConcurrentLinkedQueue fileAttenteClient = new ConcurrentLinkedQueue() ;
+            socketChannelFileAttente.put(chan, fileAttenteClient) ;
+            listeFileAttente.add(fileAttenteClient) ;
+            listeSocket.add(chan) ;
+        }
     }
+
 
     private static void traiterMessage(String entree, SocketChannel chan, Selector select) throws IOException {
-        if(entree.equals("exit"))
+        if(entree.equals("exit")) {
             supprimerFileAttente(chan);
-        else if(!verifierMessage(entree)){
+        }
+        else if (!verifierMessage(entree)){
             chan.write(ByteBuffer.wrap("ERROR chatamu".getBytes()));
             //supprimerFileAttente(chan);
         }
         else{
             int portSocket = chan.socket().getPort();
-            String pseudo = map.get(portSocket);
+            String pseudo = clientPseudo.get(portSocket);
             String messsage = recupererContenuMessage(entree);
 
             String messageTraite = pseudo + "> " + messsage ;
             //ajouterListes(messageTraite, portSocket);
             System.out.println(pseudo + "> " + messsage);
             for (ConcurrentLinkedQueue file : listeFileAttente) {
-                ConcurrentLinkedQueue f = filesAttentes.get(chan);
+                ConcurrentLinkedQueue f = socketChannelFileAttente.get(chan);
                 if (f == null) continue;
                 /* Que sur les autres files*/
                 if(! f.equals(file)) {
@@ -161,43 +166,8 @@ public class SlaveServeur {
                     channel.register(select, SelectionKey.OP_WRITE | SelectionKey.OP_READ) ;
                 }
             }
-
             //chan.write(ByteBuffer.wrap("OK".getBytes()));
         }
-    }
-
-    private static void traiterLogin(String entree, SocketChannel chan) throws IOException {
-
-        if(!verifierConnexion(entree)){
-            chan.write(ByteBuffer.wrap("ERROR LOGIN aborting chatamu protocol".getBytes()));
-        }
-        else if(!verifierPseudo(recupererContenuLogin(entree))) {
-            chan.write(ByteBuffer.wrap("ERROR LOGIN username".getBytes()));
-        }
-        else {
-            String pseudo =  recupererContenuLogin(entree) ;
-            int portSocket = chan.socket().getPort();
-            map.put(portSocket, pseudo);
-
-            /* A chaque nouveau client on lui associe sa file */
-            ConcurrentLinkedQueue fileAttenteClient = new ConcurrentLinkedQueue() ;
-            filesAttentes.put(chan, fileAttenteClient) ;
-            listeFileAttente.add(fileAttenteClient) ;
-            listeSocket.add(chan) ;
-
-            chan.write(ByteBuffer.wrap("OK".getBytes()));
-        }
-    }
-
-
-    private static String recupererContenuLogin(String entree){
-        return entree.split(" ")[1] ;
-    }
-
-    private static String recupererContenuMessage(String entree){
-        String[] entrees = entree.split(" ", 2);
-
-        return entrees[1];
     }
 
     private static boolean verifierConnexion(String entree){
@@ -210,23 +180,37 @@ public class SlaveServeur {
 
     private static boolean verifierPseudo(String entree) {
         for (SocketChannel sock : listeSocket) {
-            if (map.get(sock.socket().getPort()).equals(entree)) {
+            if (clientPseudo.get(sock.socket().getPort()).equals(entree)) {
                 return false;
             }
         }
         return true;
     }
 
-    private static boolean verifierCoServeur(String entree){
-        return (entree.split(" ")[0].equals("SERVEURCONNECT")) && (entree.split(" ").length == 2);
+
+    private static SocketChannel getChan(ConcurrentLinkedQueue fileAttente) {
+        for (SocketChannel socketChannel : listeSocket){
+            if (socketChannelFileAttente.get(socketChannel) == fileAttente){
+                return socketChannel ;
+            }
+        }
+        return null ;
     }
 
+    private static String recupererContenuLogin(String entree){
+        return entree.split(" ")[1] ;
+    }
+
+    private static String recupererContenuMessage(String entree){
+        String[] entrees = entree.split(" ", 2);
+        return entrees[1];
+    }
 
     /* Messages client transmis sur les autres files */
     private static void ajouterListes(String message, SocketChannel socketChannel){
         for (ConcurrentLinkedQueue file : listeFileAttente) {
             /* Que sur les autres files*/
-            if(! filesAttentes.get(socketChannel).equals(file))
+            if(! socketChannelFileAttente.get(socketChannel).equals(file))
                 file.add(message) ;
         }
     }
@@ -234,11 +218,14 @@ public class SlaveServeur {
     /* Lorsqu'un client se déconnecte, on supprime sa file d'attente */
     private static void supprimerFileAttente(SocketChannel socketChannel){
         /* on supprime de la liste */
-        listeFileAttente.remove(filesAttentes.get(socketChannel)) ;
+        listeFileAttente.remove(socketChannelFileAttente.get(socketChannel)) ;
 
         /* on supprime la file d'attente */
-        filesAttentes.remove(socketChannel) ;
-
+        socketChannelFileAttente.remove(socketChannel) ;
         listeSocket.remove(socketChannel) ;
+    }
+
+    private static void fermerServer(){
+        
     }
 }

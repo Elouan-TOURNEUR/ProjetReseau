@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé">
-      <change afterPath="$PROJECT_DIR$/src/SlaveServeur.java" afterDir="false" />
+    <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ChatamuCentral.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ChatamuCentral.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/EchoClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/EchoClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SlaveServeur.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SlaveServeur.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -89,7 +89,7 @@
     <configuration name="SlaveServeur 1" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="SlaveServeur" />
       <module name="Projet_Reseaux" />
-      <option name="PROGRAM_PARAMETERS" value="12346 Salon1" />
+      <option name="PROGRAM_PARAMETERS" value="12346 Slave1" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -97,7 +97,7 @@
     <configuration name="SlaveServeur 2" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="SlaveServeur" />
       <module name="Projet_Reseaux" />
-      <option name="PROGRAM_PARAMETERS" value="12347 Salon2" />
+      <option name="PROGRAM_PARAMETERS" value="12347 Slave2" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -105,19 +105,19 @@
     <configuration name="SlaveServeur 3" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="SlaveServeur" />
       <module name="Projet_Reseaux" />
-      <option name="PROGRAM_PARAMETERS" value="12348 Salon3" />
+      <option name="PROGRAM_PARAMETERS" value="12348 Slave3" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
     <configuration name="Cluster" type="CompoundRunConfigurationType">
-      <toRun name="EchoClient 3" type="Application" />
-      <toRun name="0 Serveur central" type="Application" />
-      <toRun name="SlaveServeur 3" type="Application" />
-      <toRun name="EchoClient 2" type="Application" />
       <toRun name="SlaveServeur 1" type="Application" />
+      <toRun name="0 Serveur central" type="Application" />
+      <toRun name="EchoClient 3" type="Application" />
+      <toRun name="SlaveServeur 3" type="Application" />
       <toRun name="EchoClient 1" type="Application" />
       <toRun name="SlaveServeur 2" type="Application" />
+      <toRun name="EchoClient 2" type="Application" />
       <method v="2" />
     </configuration>
     <configuration name="Salon central" type="CompoundRunConfigurationType">
@@ -174,7 +174,8 @@
       <workItem from="1584537538523" duration="13566000" />
       <workItem from="1584616157347" duration="39000" />
       <workItem from="1584616198449" duration="1000" />
-      <workItem from="1584698513268" duration="21292000" />
+      <workItem from="1584698513268" duration="22024000" />
+      <workItem from="1584783836223" duration="8461000" />
     </task>
     <task id="LOCAL-00001" summary="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé">
       <created>1584557598849</created>
@@ -183,7 +184,14 @@
       <option name="project" value="LOCAL" />
       <updated>1584557598850</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Commencement de la fédération de serveurs">
+      <created>1584733270586</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1584733270586</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -204,7 +212,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé" />
-    <option name="LAST_COMMIT_MESSAGE" value="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé" />
+    <MESSAGE value="Commencement de la fédération de serveurs" />
+    <option name="LAST_COMMIT_MESSAGE" value="Commencement de la fédération de serveurs" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ProjetReseau$EchoClient.ic" NAME="EchoClient Coverage Results" MODIFIED="1584006174534" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
