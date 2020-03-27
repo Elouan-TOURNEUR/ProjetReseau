@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/pairs.cfg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ChatamuCentral.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ChatamuCentral.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/EchoClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/EchoClient.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SlaveServeur.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SlaveServeur.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -175,7 +175,11 @@
       <workItem from="1584616157347" duration="39000" />
       <workItem from="1584616198449" duration="1000" />
       <workItem from="1584698513268" duration="22024000" />
-      <workItem from="1584783836223" duration="8461000" />
+      <workItem from="1584783836223" duration="11076000" />
+      <workItem from="1585058517624" duration="31000" />
+      <workItem from="1585217070608" duration="13000" />
+      <workItem from="1585217090888" duration="11627000" />
+      <workItem from="1585307448600" duration="15392000" />
     </task>
     <task id="LOCAL-00001" summary="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé">
       <created>1584557598849</created>
@@ -191,11 +195,21 @@
       <option name="project" value="LOCAL" />
       <updated>1584733270586</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Correction de bug&#10;TODO : le server Master récupère les requètes clients qu'il délègue aux serveurs Slaves, les Slaves traitent les requètes clients et les transmets au Master qui renvoi aux clients">
+      <created>1584795798294</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1584795798294</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.cfg" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -213,7 +227,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé" />
     <MESSAGE value="Commencement de la fédération de serveurs" />
-    <option name="LAST_COMMIT_MESSAGE" value="Commencement de la fédération de serveurs" />
+    <MESSAGE value="Correction de bug&#10;TODO : le server Master récupère les requètes clients qu'il délègue aux serveurs Slaves, les Slaves traitent les requètes clients et les transmets au Master qui renvoi aux clients" />
+    <option name="LAST_COMMIT_MESSAGE" value="Correction de bug&#10;TODO : le server Master récupère les requètes clients qu'il délègue aux serveurs Slaves, les Slaves traitent les requètes clients et les transmets au Master qui renvoi aux clients" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ProjetReseau$EchoClient.ic" NAME="EchoClient Coverage Results" MODIFIED="1584006174534" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
