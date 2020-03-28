@@ -3,8 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ChatamuCentral.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ChatamuCentral.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/EchoClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/EchoClient.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SlaveServeur.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SlaveServeur.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -181,7 +179,7 @@
       <workItem from="1585217090888" duration="11627000" />
       <workItem from="1585307448600" duration="15604000" />
       <workItem from="1585389258548" duration="13962000" />
-      <workItem from="1585417227571" duration="1744000" />
+      <workItem from="1585417227571" duration="2509000" />
     </task>
     <task id="LOCAL-00001" summary="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé">
       <created>1584557598849</created>
@@ -211,7 +209,14 @@
       <option name="project" value="LOCAL" />
       <updated>1585329439211</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="fédération de serveur">
+      <created>1585419244302</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1585419244302</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -238,7 +243,8 @@
     <MESSAGE value="Commencement de la fédération de serveurs" />
     <MESSAGE value="Correction de bug&#10;TODO : le server Master récupère les requètes clients qu'il délègue aux serveurs Slaves, les Slaves traitent les requètes clients et les transmets au Master qui renvoi aux clients" />
     <MESSAGE value="Avancement" />
-    <option name="LAST_COMMIT_MESSAGE" value="Avancement" />
+    <MESSAGE value="fédération de serveur" />
+    <option name="LAST_COMMIT_MESSAGE" value="fédération de serveur" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ProjetReseau$EchoClient.ic" NAME="EchoClient Coverage Results" MODIFIED="1584006174534" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />

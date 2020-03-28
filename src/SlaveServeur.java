@@ -167,7 +167,7 @@ public class SlaveServeur {
             String messageErreur = pseudo + " ERROR chatamu";
             client.write(ByteBuffer.wrap(messageErreur.getBytes()));
         } else {
-            String messageTraite = pseudo + "> " + message;
+            String messageTraite = pseudo + "> " + recupererContenuMessage(message);
             //ajouterListes(messageTraite, portSocket);
             System.out.println(messageTraite);
 
