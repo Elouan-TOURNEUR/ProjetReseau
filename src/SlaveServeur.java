@@ -18,6 +18,7 @@ public class SlaveServeur {
 
     private static String name = null ;
 
+    private static  SocketChannel client = null ;
 
     /* Map qui associe un socketChannel à une file d'attente */
     private static HashMap<SocketChannel, ConcurrentLinkedQueue> socketChannelFileAttente = new HashMap<>();
@@ -33,13 +34,16 @@ public class SlaveServeur {
 
     public static void main(String[] args) throws IOException {
         int argc = args.length;
-        int port = 0;
+        int port = 0 ;
+        String ip = "" ;
+        client = SocketChannel.open(new InetSocketAddress(ip, 12345));
 
         /* Traitement des arguments */
-        if (argc == 2) {
+        if (argc == 3) {
             try {
-                port = Integer.parseInt(args[0]);
-                name = args[1] ;
+                ip = args[0];
+                port = Integer.parseInt(args[1]);
+                name = args[2] ;
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -47,8 +51,11 @@ public class SlaveServeur {
             System.out.println("Usage: java EchoServer port");
             System.exit(2);
         }
-        SocketChannel client = SocketChannel.open(new InetSocketAddress(InetAddress.getLocalHost(), 12345));
+
+
+
         String messageReady = "OPEN " + name + " " + port ;
+        System.out.println(client.toString());
         client.write(ByteBuffer.wrap(messageReady.getBytes()));
 
 
@@ -134,18 +141,17 @@ public class SlaveServeur {
 
     private static void traiterReplicationSalon(String entree, SocketChannel chan) throws IOException {
         System.out.println("Je traite une replication");
-        String message = recupererContenuLogin(entree) ;
+        String message = recupererContenuMessage(entree) ;
         String pseudo = entree.split(" ")[0] ;
         System.out.println(message);
-        SocketChannel clientt ;
-        for (String client : clients) {
-            String messageRetourne = client + message ;
-            clientt = SocketChannel.open(new InetSocketAddress(InetAddress.getLocalHost(), 12345));
-            clientt.write(ByteBuffer.wrap(messageRetourne.getBytes()));
+        for (String c : clients) {
+            String messageRetourne = c + " " + message ;
+            System.out.println("j'envoie : " + messageRetourne);
+            client.write(ByteBuffer.wrap(messageRetourne.getBytes()));
         }
     }
     private static void traiterMessage(String entree, SocketChannel chan, Selector select) throws IOException {
-        System.out.println("je traite un message");
+        System.out.println("Je traite un message");
         /*if(entree.equals("exit")) {
             supprimerFileAttente(chan);
         }
@@ -155,38 +161,39 @@ public class SlaveServeur {
         }*/
 
 
-        String pseudo = entree.split(" ")[0] ;
+        String pseudo = entree.split(" ")[0];
         String message = recupererContenuMessage(entree);
+        if (!verifierMessage(message)) {
+            String messageErreur = pseudo + " ERROR chatamu";
+            client.write(ByteBuffer.wrap(messageErreur.getBytes()));
+        } else {
+            String messageTraite = pseudo + "> " + message;
+            //ajouterListes(messageTraite, portSocket);
+            System.out.println(messageTraite);
 
-        String messageTraite = pseudo + "> " + message ;
-        //ajouterListes(messageTraite, portSocket);
-        System.out.println(messageTraite);
+            /* Que sur les autres files*/
+            String messageRetourne = name + " " + messageTraite;
 
-        /* Que sur les autres files*/
-        String messageRetourne = name + messageTraite ;
-        SocketChannel clientt ;
+            client.write(ByteBuffer.wrap(messageRetourne.getBytes()));
+            System.out.println("j'envoie " + messageRetourne);
 
-        clientt = SocketChannel.open(new InetSocketAddress(InetAddress.getLocalHost(), 12345));
-        clientt.write(ByteBuffer.wrap(messageRetourne.getBytes()));
+            for (String c : clients) {
+                String messageClient = c + " " + messageTraite;
+                client.write(ByteBuffer.wrap(messageClient.getBytes()));
+                System.out.println("j'envoie " + messageClient);
 
-        for (String client : clients) {
-            String messageClient = client + messageTraite ;
-            clientt = SocketChannel.open(new InetSocketAddress(InetAddress.getLocalHost(), 12345));
-            clientt.write(ByteBuffer.wrap(messageClient.getBytes()));        }
+            }
             /* On récupère le SocketChannel de la file d'attente
             SocketChannel channel = getChan(file) ;
             channel.configureBlocking(false) ;
              On le met en mode write car le serveur renvoie dans la socket du client les messages de la file
             channel.register(select, SelectionKey.OP_WRITE | SelectionKey.OP_READ) ;
             */
+        }
     }
     //chan.write(ByteBuffer.wrap("OK".getBytes()));
 
 
-
-    private static boolean verifierConnexion(String entree){
-        return (entree.split(" ")[0].equals("LOGIN")) && (entree.split(" ").length == 2) ;
-    }
 
     private static boolean verifierMessage(String entree){
         return (entree.split(" ")[0].equals("MESSAGE"));

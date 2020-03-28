@@ -109,6 +109,7 @@ class MasterRecup implements Runnable{
                         }
                         ByteBuffer msg = buffer.flip();
                         String entree = new String(msg.array()).trim();
+                        System.out.println("je recoit : " + entree);
                         if (gestionServeur(entree))
                             traiterGestionServeur(entree, chan);
                         else if (messageServeur(chan)){
@@ -237,6 +238,7 @@ class MasterRecup implements Runnable{
     }
 
     private void traiterMessageServeur(String entree, SocketChannel chan, Selector select) throws IOException {
+        System.out.println("je recois message de serveur");
         if (serveursDisponnibles.contains(entree.split(" ")[0])){
             String nomEmetteur = entree.split(" ")[0] ;
             String message = recupererContenuMessage(entree) ;
@@ -245,7 +247,8 @@ class MasterRecup implements Runnable{
                 if (serveur.equals(nomEmetteur))
                         continue;
                 else {
-                    SocketChannel ServeurARepliquer = serveursNames.get(nomEmetteur) ;
+                    SocketChannel ServeurARepliquer = serveursNames.get(serveur) ;
+                    //System.out.println(ServeurARepliquer.toString());
                     master.add(ServeurARepliquer) ;
                     master.add(messageTraite) ;
                 }
@@ -253,7 +256,10 @@ class MasterRecup implements Runnable{
         }
         else {
             String message = recupererContenuMessage(entree) ;
+            //System.out.println(entree);
             SocketChannel client = pseudoChannel.get(entree.split(" ")[0]) ;
+            System.out.println(client.toString());
+
             master.add(client) ;
             master.add(message) ;
         }
@@ -264,8 +270,8 @@ class MasterRecup implements Runnable{
         String pseudo = clientPseudo.get(portSocket);
         // On recupere le salon auquel le client est connecté
         String nomSalon = trouverSalonClient(chan) ;
-        String message = recupererContenuMessage(entree) ;
-        String messagetraite = pseudo + " " + message ;
+        //String message = recupererContenuMessage(entree) ;
+        String messagetraite = pseudo + " " + entree ;
         SocketChannel dest = serveursNames.get(nomSalon) ;
 
         // On transmet d'abord les infos concernant le client au serveur
@@ -303,9 +309,6 @@ class MasterRecup implements Runnable{
         return (entree.split(" ")[0].equals("LOGIN")) && (entree.split(" ").length == 2) ;
     }
 
-    private static boolean verifierMessage(String entree){
-        return (entree.split(" ")[0].equals("MESSAGE"));
-    }
 
     private static boolean verifierPseudo(String entree) {
         for (SocketChannel sock : listeSocketClient) {
@@ -390,33 +393,39 @@ class MasterReturn implements Runnable{
     public void run() {
         try {
             while (true) {
-                Thread.sleep(3000);
-                System.out.println(MasterRecup.master.size());
+                //Thread.sleep(3000);
+                //System.out.println(MasterRecup.master.size());
                 if(MasterRecup.master.isEmpty())
                     continue;
                 SocketChannel chan = (SocketChannel) MasterRecup.master.poll();
+                //System.out.println("dans la pile");
                 System.out.println(chan.toString());
                 String message = (String) MasterRecup.master.poll();
                 System.out.println(message);;
                 //chan.write(ByteBuffer.wrap(message.getBytes())) ;
+
                 SocketChannel client ;
+
                 if(chan.equals(MasterRecup.serveursNames.get("Slave1"))) {
-                    client = SocketChannel.open(new InetSocketAddress(InetAddress.getLocalHost(), 12346));
+                    client = SocketChannel.open(new InetSocketAddress("127.0.0.1", 12346));
+                    //System.out.println(client.toString());
                     client.write(ByteBuffer.wrap(message.getBytes()));
                 }
                 else if(chan.equals(MasterRecup.serveursNames.get("Slave2"))){
-                    client = SocketChannel.open(new InetSocketAddress(InetAddress.getLocalHost(), 12347));
+                    client = SocketChannel.open(new InetSocketAddress("127.0.0.1", 12347));
                     client.write(ByteBuffer.wrap(message.getBytes()));
                 }
                 else if(chan.equals(MasterRecup.serveursNames.get("Slave3"))){
-                    client = SocketChannel.open(new InetSocketAddress(InetAddress.getLocalHost(), 12348));
+                    client = SocketChannel.open(new InetSocketAddress("127.0.0.1", 12348));
                     client.write(ByteBuffer.wrap(message.getBytes()));
                 }
                 else {
                     chan.write(ByteBuffer.wrap(message.getBytes())) ;
                 }
+
+                //chan.write(ByteBuffer.wrap(message.getBytes())) ;
             }
-        } catch (InterruptedException | IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         System.err.println("Fin de la session.");
