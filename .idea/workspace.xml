@@ -4,8 +4,6 @@
     <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ChatamuCentral.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ChatamuCentral.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/EchoClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/EchoClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SlaveServeur.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SlaveServeur.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -45,7 +43,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Compound.Cluster">
+  <component name="RunManager" selected="Application.SlaveServeur 2">
     <configuration name="0 Salon central" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="SalonCentral" />
       <module name="Projet_Reseaux" />
@@ -176,6 +174,8 @@
       <workItem from="1584616198449" duration="1000" />
       <workItem from="1584698513268" duration="22024000" />
       <workItem from="1584783836223" duration="8461000" />
+      <workItem from="1584815634703" duration="3376000" />
+      <workItem from="1585386120313" duration="87000" />
     </task>
     <task id="LOCAL-00001" summary="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé">
       <created>1584557598849</created>
