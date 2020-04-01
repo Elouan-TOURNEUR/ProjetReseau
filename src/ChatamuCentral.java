@@ -178,7 +178,7 @@ public class ChatamuCentral {
                 chan.write(ByteBuffer.wrap("ok".getBytes()));
                 clientsParSalon.get(name).add(chan);
                 String pseudo = clientPseudo.get(chan.socket().getPort()) ;
-                System.out.println(pseudo + " a rejoin le serveur " + name);
+                System.out.println(pseudo + " a rejoint le serveur " + name);
             }
             else {
                 chan.write(ByteBuffer.wrap("ERROR SERVER NAME".getBytes()));
