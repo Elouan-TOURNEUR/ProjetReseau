@@ -67,14 +67,13 @@ class MasterRecup implements Runnable{
     /* Liste qui contient toutes les serveurs salon */
     private static List<String> serveursDisponnibles = new ArrayList<>() ;
 
-    private static List<SocketChannel> listSocketServeur = new ArrayList<>() ;
+    public static List<SocketChannel> listSocketServeur = new ArrayList<>() ;
 
-
-    public static ConcurrentLinkedQueue getMaster() {
-        return master;
-    }
-
+    /* Liste du master qui détermine l'ordre d'affichage */
     public static ConcurrentLinkedQueue master = new ConcurrentLinkedQueue() ;
+
+    public static HashMap<SocketChannel, Integer> socketChannelPort = new HashMap<>() ;
+
 
     private ServerSocketChannel server;
 
@@ -85,16 +84,23 @@ class MasterRecup implements Runnable{
     @Override
     public void run() {
         try {
+            long timeReferant = System.nanoTime() ;
+            long time = System.nanoTime() ;
             server.configureBlocking(false);
             Selector select = Selector.open();
             server.register(select, SelectionKey.OP_ACCEPT);
             ByteBuffer buffer = ByteBuffer.allocate(128);
-
             while (true) {
                 select.select();
                 Iterator<SelectionKey> keys = select.selectedKeys().iterator();
 
                 while (keys.hasNext()) {
+                    if (System.nanoTime()/1000000000 - timeReferant/1000000000 > 180)
+                        return ;
+                    if (System.nanoTime()/1000000000 - time/1000000000 > 15) {
+                        Thread.sleep(10000);
+                        time = System.nanoTime() ;
+                    }
                     SelectionKey key = keys.next();
 
                     if (key.isReadable()) {
@@ -109,7 +115,6 @@ class MasterRecup implements Runnable{
                         }
                         ByteBuffer msg = buffer.flip();
                         String entree = new String(msg.array()).trim();
-                        System.out.println("je recoit : " + entree);
                         if (gestionServeur(entree))
                             traiterGestionServeur(entree, chan);
                         else if (messageServeur(chan)){
@@ -149,7 +154,7 @@ class MasterRecup implements Runnable{
                     keys.remove();
                 }
             }
-        }catch (IOException e) {
+        }catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -174,12 +179,15 @@ class MasterRecup implements Runnable{
 
     private static void traiterOuvertureSalon(String entree, SocketChannel chan) {
         String nomSalon = entree.split(" ")[1] ;
+        String portString = entree.split(" ")[2] ;
+        int port = Integer.parseInt(portString) ;
         System.out.println("Le serveur " + nomSalon + " a ouvert.");
         serveursDisponnibles.add(nomSalon) ;
         listSocketServeur.add(chan) ;
         serveursNames.put(nomSalon, chan) ;
         ArrayList<SocketChannel> salon = new ArrayList<SocketChannel>() ;
         clientsParSalon.put(nomSalon, salon) ;
+        socketChannelPort.put(chan, port) ;
     }
 
     private static void traiterFermetureSalon(String entree, SocketChannel chan) {
@@ -187,6 +195,9 @@ class MasterRecup implements Runnable{
         System.out.println("Le serveur " + nomSalon + " a fermé.");
         serveursNames.remove(nomSalon, chan) ;
         serveursDisponnibles.remove(nomSalon) ;
+        listSocketServeur.remove(chan) ;
+        clientsParSalon.remove(nomSalon) ;
+        socketChannelPort.remove(chan) ;
     }
 
     private static void traiterLogin(String entree, SocketChannel chan) throws IOException {
@@ -393,42 +404,30 @@ class MasterReturn implements Runnable{
     public void run() {
         try {
             while (true) {
-                //Thread.sleep(3000);
-                //System.out.println(MasterRecup.master.size());
+                Thread.sleep(1000);
                 if(MasterRecup.master.isEmpty())
                     continue;
                 SocketChannel chan = (SocketChannel) MasterRecup.master.poll();
-                //System.out.println("dans la pile");
-                System.out.println(chan.toString());
                 String message = (String) MasterRecup.master.poll();
-                System.out.println(message);;
-                //chan.write(ByteBuffer.wrap(message.getBytes())) ;
 
                 SocketChannel client ;
 
-                if(chan.equals(MasterRecup.serveursNames.get("Slave1"))) {
-                    client = SocketChannel.open(new InetSocketAddress("127.0.0.1", 12346));
-                    //System.out.println(client.toString());
-                    client.write(ByteBuffer.wrap(message.getBytes()));
-                }
-                else if(chan.equals(MasterRecup.serveursNames.get("Slave2"))){
-                    client = SocketChannel.open(new InetSocketAddress("127.0.0.1", 12347));
-                    client.write(ByteBuffer.wrap(message.getBytes()));
-                }
-                else if(chan.equals(MasterRecup.serveursNames.get("Slave3"))){
-                    client = SocketChannel.open(new InetSocketAddress("127.0.0.1", 12348));
+                if (serveur(chan)){
+                    client = SocketChannel.open(new InetSocketAddress("127.0.0.1", MasterRecup.socketChannelPort.get(chan)));
                     client.write(ByteBuffer.wrap(message.getBytes()));
                 }
                 else {
                     chan.write(ByteBuffer.wrap(message.getBytes())) ;
                 }
-
-                //chan.write(ByteBuffer.wrap(message.getBytes())) ;
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
         System.err.println("Fin de la session.");
         exit(0);
+    }
+
+    public boolean serveur(SocketChannel chan){
+        return MasterRecup.listSocketServeur.contains(chan) ;
     }
 }

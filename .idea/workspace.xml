@@ -2,11 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/pairs.cfg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ChatamuCentral.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ChatamuCentral.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/EchoClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/EchoClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SlaveServeur.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SlaveServeur.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pairs.cfg" beforeDir="false" afterPath="$PROJECT_DIR$/src/pairs.cfg" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -46,7 +44,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.EchoClient 1">
+  <component name="RunManager" selected="Compound.Cluster">
     <configuration name="0 Salon central" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="SalonCentral" />
       <module name="Projet_Reseaux" />
@@ -185,8 +183,6 @@
       <workItem from="1585417227571" duration="2509000" />
       <workItem from="1585419907690" duration="82000" />
       <workItem from="1585741506753" duration="7827000" />
-      <workItem from="1585824081402" duration="679000" />
-      <workItem from="1585838726148" duration="677000" />
     </task>
     <task id="LOCAL-00001" summary="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé">
       <created>1584557598849</created>
