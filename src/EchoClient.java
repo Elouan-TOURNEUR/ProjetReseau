@@ -36,7 +36,8 @@ public class EchoClient {
 
         try {
             client = SocketChannel.open(new InetSocketAddress(ip, port));
-            System.err.println("le n° de la socket est : " + client);
+            System.out.println(client.toString());
+            //System.err.println("le n° de la socket est : " + client);
             buffer = ByteBuffer.allocate(256);
         } catch (IOException e) {
             System.err.println("Connexion: hôte inconnu : " + ip);

@@ -1,38 +1,18 @@
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static java.lang.System.exit;
+import static java.lang.System.setOut;
+
 public class ChatamuCentral {
-
-    /* Map qui associe un port client à un pseudo */
-    private static HashMap<Integer, String> clientPseudo = new HashMap<>();
-
-    /* Map qui associe un socketChannel à une file d'attente */
-    private static HashMap<SocketChannel, ConcurrentLinkedQueue> socketChannelFileAttente = new HashMap<>();
-
-    /* Liste qui contient toutes les files d'attentes */
-    private static List<ConcurrentLinkedQueue> listeFileAttente = new ArrayList<>() ;
-
-    /* Liste qui contient toutes les socketsChannels */
-    private static List<SocketChannel> listeSocket = new ArrayList<>() ;
-
-    /* Map qui associe un nom à une liste de socketsChannels */
-    private static HashMap<String, ArrayList<SocketChannel>> clientsParSalon = new HashMap<>() ;
-
-    /* Map qui associe un serveur à un nom */
-    private static HashMap<String, String> serveursNames = new HashMap<>() ;
-
-    /* Liste qui contient toutes les serveurs salon */
-    private static List<String> serveursDisponnibles = new ArrayList<String>() ;
 
     public static void main(String[] args) throws IOException {
         int argc = args.length;
@@ -52,93 +32,160 @@ public class ChatamuCentral {
 
         ServerSocketChannel ssc = ServerSocketChannel.open();
         ssc.socket().bind(new InetSocketAddress(port));
-        ssc.configureBlocking(false);
 
-        Selector select = Selector.open();
-        ssc.register(select, SelectionKey.OP_ACCEPT);
-        ByteBuffer buffer = ByteBuffer.allocate(128);
+        Thread threadRead = new Thread(new MasterRecup(ssc));
+        Thread threadWrite = new Thread(new MasterReturn(ssc));
+        threadRead.start();
+        threadWrite.start();
+
+    }
+}
+
+class MasterRecup implements Runnable{
+
+    /* Map qui associe un port client à un pseudo */
+    private static HashMap<Integer, String> clientPseudo = new HashMap<>();
+
+    private static HashMap<String, SocketChannel> pseudoChannel = new HashMap<>();
 
 
-        while(true){
-            select.select();
-            Iterator<SelectionKey> keys = select.selectedKeys().iterator();
+    /* Map qui associe un socketChannel à une file d'attente */
+    private static HashMap<SocketChannel, ConcurrentLinkedQueue> socketChannelFileAttente = new HashMap<>();
 
-            while(keys.hasNext()){
-                SelectionKey key = keys.next();
+    /* Liste qui contient toutes les files d'attentes */
+    private static List<ConcurrentLinkedQueue> listeFileAttente = new ArrayList<>() ;
 
-                if(key.isReadable()){
-                    SocketChannel chan = (SocketChannel) key.channel();
-                    chan.configureBlocking(false);
+    /* Liste qui contient toutes les socketsChannels client */
+    private static List<SocketChannel> listeSocketClient = new ArrayList<>() ;
 
-                    try{
-                        chan.read(buffer);
-                    } catch (IOException e){
-                        chan.close();
-                        break;
+    /* Map qui associe un nom à une liste de socketsChannels */
+    private static HashMap<String, ArrayList<SocketChannel>> clientsParSalon = new HashMap<>() ;
+
+    /* Map qui associe un serveur à un nom */
+    public static HashMap<String, SocketChannel> serveursNames = new HashMap<>() ;
+
+    /* Liste qui contient toutes les serveurs salon */
+    private static List<String> serveursDisponnibles = new ArrayList<>() ;
+
+    private static List<SocketChannel> listSocketServeur = new ArrayList<>() ;
+
+
+    public static ConcurrentLinkedQueue getMaster() {
+        return master;
+    }
+
+    public static ConcurrentLinkedQueue master = new ConcurrentLinkedQueue() ;
+
+    private ServerSocketChannel server;
+
+    public MasterRecup(ServerSocketChannel server){
+        this.server = server;
+    }
+
+    @Override
+    public void run() {
+        try {
+            server.configureBlocking(false);
+            Selector select = Selector.open();
+            server.register(select, SelectionKey.OP_ACCEPT);
+            ByteBuffer buffer = ByteBuffer.allocate(128);
+
+            while (true) {
+                select.select();
+                Iterator<SelectionKey> keys = select.selectedKeys().iterator();
+
+                while (keys.hasNext()) {
+                    SelectionKey key = keys.next();
+
+                    if (key.isReadable()) {
+                        SocketChannel chan = (SocketChannel) key.channel();
+                        chan.configureBlocking(false);
+
+                        try {
+                            chan.read(buffer);
+                        } catch (IOException e) {
+                            chan.close();
+                            break;
+                        }
+                        ByteBuffer msg = buffer.flip();
+                        String entree = new String(msg.array()).trim();
+                        System.out.println("je recoit : " + entree);
+                        if (gestionServeur(entree))
+                            traiterGestionServeur(entree, chan);
+                        else if (messageServeur(chan)){
+                            traiterMessageServeur(entree, chan, select) ;
+                        }
+                        else if (clientSurAucunServer(chan) && clientPseudo.containsKey(chan.socket().getPort())) {
+                            traiterConnexionSalon(entree, chan);
+                        } else if (clientPseudo.containsKey(chan.socket().getPort())) {
+                            traiterMessageClient(entree, chan, select);
+                        } else if (!clientPseudo.containsKey(chan.socket().getPort())) {
+                            traiterLogin(entree, chan);
+                        }
+                        buffer = ByteBuffer.allocate(128);
+
+                    } else if (key.isAcceptable()) {
+                        SocketChannel csc = server.accept();
+                        csc.configureBlocking(false);
+                        csc.register(select, SelectionKey.OP_READ);
+
+                    } else if (key.isWritable()) {
+                        SocketChannel chan = (SocketChannel) key.channel();
+                        chan.configureBlocking(false);
+
+                        /* On récupère la file d'attente */
+                        ConcurrentLinkedQueue fileAttente = socketChannelFileAttente.get(chan);
+                        if (fileAttente == null) break;
+
+                        /* On récupère le premier message de la file d'attente et on le supprime grace à poll() */
+                        String message = (String) fileAttente.poll();
+
+                        if (message != null)
+                            chan.write(ByteBuffer.wrap(message.getBytes()));
+
+                        /* On repasse le canal en lecture */
+                        chan.register(select, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
                     }
-                    ByteBuffer msg = buffer.flip();
-                    String entree = new String(msg.array()).trim();
-                    if(messageDeSalon(entree))
-                        traiterMessageDeSalon(entree) ;
-                    else if (clientSurAucunServer(chan) && clientPseudo.containsKey(chan.socket().getPort())){
-                        traiterConnexionSalon(entree, chan) ;
-                    }
-                    else if(clientPseudo.containsKey(chan.socket().getPort())) {
-                        traiterMessage(entree, chan, select);
-                    }
-                    else if (!clientPseudo.containsKey(chan.socket().getPort())){
-                        traiterLogin(entree, chan);
-                    }
-                    buffer = ByteBuffer.allocate(128);
-
-                } else if(key.isAcceptable()){
-                    SocketChannel csc = ssc.accept();
-                    csc.configureBlocking(false);
-                    csc.register(select, SelectionKey.OP_READ);
-
-                } else if (key.isWritable()){
-                    SocketChannel chan = (SocketChannel) key.channel();
-                    chan.configureBlocking(false);
-
-                    /* On récupère la file d'attente */
-                    ConcurrentLinkedQueue fileAttente = socketChannelFileAttente.get(chan);
-                    if(fileAttente == null) break;
-
-                    /* On récupère le premier message de la file d'attente et on le supprime grace à poll() */
-                    String message = (String)fileAttente.poll();
-
-                    if(message != null)
-                        chan.write(ByteBuffer.wrap(message.getBytes()));
-
-                    /* On repasse le canal en lecture */
-                    chan.register(select, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+                    keys.remove();
                 }
-                keys.remove();
             }
+        }catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    private static void traiterMessageDeSalon(String entree) {
-        String first = entree.split(" ")[0] ;
-        if (first.equals("OPEN"))
-            traiterOuvertureSalon(entree) ;
-        else
-            traiterFermetureSalon(entree) ;
+
+
+    private boolean messageServeur(SocketChannel chan) {
+        for (SocketChannel socketChannel : listSocketServeur){
+            if (chan.equals(socketChannel))
+                return true ;
+        }
+        return false ;
     }
 
-    private static void traiterOuvertureSalon(String entree) {
+    private static void traiterGestionServeur(String entree, SocketChannel chan) {
+        String first = entree.split(" ")[0] ;
+        if (first.equals("OPEN"))
+            traiterOuvertureSalon(entree, chan) ;
+        else
+            traiterFermetureSalon(entree, chan) ;
+    }
+
+    private static void traiterOuvertureSalon(String entree, SocketChannel chan) {
         String nomSalon = entree.split(" ")[1] ;
         System.out.println("Le serveur " + nomSalon + " a ouvert.");
         serveursDisponnibles.add(nomSalon) ;
-        serveursNames.put(nomSalon, entree.split(" ")[2]) ;
+        listSocketServeur.add(chan) ;
+        serveursNames.put(nomSalon, chan) ;
         ArrayList<SocketChannel> salon = new ArrayList<SocketChannel>() ;
         clientsParSalon.put(nomSalon, salon) ;
     }
 
-    private static void traiterFermetureSalon(String entree) {
+    private static void traiterFermetureSalon(String entree, SocketChannel chan) {
         String nomSalon = entree.split(" ")[1] ;
         System.out.println("Le serveur " + nomSalon + " a fermé.");
-        serveursNames.remove(nomSalon, entree.split(" ")[2]) ;
+        serveursNames.remove(nomSalon, chan) ;
         serveursDisponnibles.remove(nomSalon) ;
     }
 
@@ -153,12 +200,13 @@ public class ChatamuCentral {
             String pseudo =  recupererContenuLogin(entree) ;
             int portSocket = chan.socket().getPort();
             clientPseudo.put(portSocket, pseudo);
+            pseudoChannel.put(pseudo, chan) ;
 
             /* A chaque nouveau client on lui associe sa file */
             ConcurrentLinkedQueue fileAttenteClient = new ConcurrentLinkedQueue() ;
             socketChannelFileAttente.put(chan, fileAttenteClient) ;
             listeFileAttente.add(fileAttenteClient) ;
-            listeSocket.add(chan) ;
+            listeSocketClient.add(chan) ;
 
             String listeSalon = "" ;
             for (String salon : serveursDisponnibles) {
@@ -177,7 +225,10 @@ public class ChatamuCentral {
             if (verifierSalon(name)) {
                 chan.write(ByteBuffer.wrap("ok".getBytes()));
                 clientsParSalon.get(name).add(chan);
+                SocketChannel serveur = serveursNames.get(name) ;
                 String pseudo = clientPseudo.get(chan.socket().getPort()) ;
+                master.add(serveur) ;
+                master.add(pseudo) ;
                 System.out.println(pseudo + " a rejoint le serveur " + name);
             }
             else {
@@ -186,37 +237,64 @@ public class ChatamuCentral {
         }
     }
 
-    private static void traiterMessage(String entree, SocketChannel chan, Selector select) throws IOException {
-        if(entree.equals("exit")) {
-            supprimerFileAttente(chan);
-        }
-        else if (!verifierMessage(entree)){
-            chan.write(ByteBuffer.wrap("ERROR chatamu".getBytes()));
-            //supprimerFileAttente(chan);
-        }
-        else{
-            int portSocket = chan.socket().getPort();
-            String pseudo = clientPseudo.get(portSocket);
-            String messsage = recupererContenuMessage(entree);
-
-            String messageTraite = pseudo + "> " + messsage ;
-            //ajouterListes(messageTraite, portSocket);
-            System.out.println(pseudo + "> " + messsage);
-            for (ConcurrentLinkedQueue file : listeFileAttente) {
-                ConcurrentLinkedQueue f = socketChannelFileAttente.get(chan);
-                if (f == null) continue;
-                /* Que sur les autres files*/
-                if(! f.equals(file)) {
-                    file.add(messageTraite + "\n");
-                    /* On récupère le SocketChannel de la file d'attente */
-                    SocketChannel channel = getChan(file) ;
-                    channel.configureBlocking(false) ;
-                    /* On le met en mode write car le serveur renvoie dans la socket du client les messages de la file */
-                    channel.register(select, SelectionKey.OP_WRITE | SelectionKey.OP_READ) ;
+    private void traiterMessageServeur(String entree, SocketChannel chan, Selector select) throws IOException {
+        System.out.println("je recois message de serveur");
+        if (serveursDisponnibles.contains(entree.split(" ")[0])){
+            String nomEmetteur = entree.split(" ")[0] ;
+            String message = recupererContenuMessage(entree) ;
+            String messageTraite = "[SALON] " + message ;
+            for(String serveur : serveursDisponnibles){
+                if (serveur.equals(nomEmetteur))
+                        continue;
+                else {
+                    SocketChannel ServeurARepliquer = serveursNames.get(serveur) ;
+                    //System.out.println(ServeurARepliquer.toString());
+                    master.add(ServeurARepliquer) ;
+                    master.add(messageTraite) ;
                 }
             }
-            //chan.write(ByteBuffer.wrap("OK".getBytes()));
         }
+        else {
+            String message = recupererContenuMessage(entree) ;
+            //System.out.println(entree);
+            SocketChannel client = pseudoChannel.get(entree.split(" ")[0]) ;
+            System.out.println(client.toString());
+
+            master.add(client) ;
+            master.add(message) ;
+        }
+    }
+
+    private static void traiterMessageClient(String entree, SocketChannel chan, Selector select) throws IOException {
+        int portSocket = chan.socket().getPort();
+        String pseudo = clientPseudo.get(portSocket);
+        // On recupere le salon auquel le client est connecté
+        String nomSalon = trouverSalonClient(chan) ;
+        //String message = recupererContenuMessage(entree) ;
+        String messagetraite = pseudo + " " + entree ;
+        SocketChannel dest = serveursNames.get(nomSalon) ;
+
+        // On transmet d'abord les infos concernant le client au serveur
+
+        // On transmet ensuite au serveur le message du client
+        master.add(dest) ;
+        master.add(messagetraite) ;
+    }
+
+
+    private static void traiterMessageSalon(String entree, SocketChannel chan, Selector select) throws IOException {
+        int portSocket = chan.socket().getPort();
+        String pseudo = clientPseudo.get(portSocket);
+        // On recupere le salon auquel le client est connecté
+        String nomSalon = trouverSalonClient(chan) ;
+        String message = pseudo + entree ;
+        SocketChannel dest = serveursNames.get(nomSalon) ;
+
+        // On transmet d'abord les infos concernant le client au serveur
+
+        // On transmet ensuite au serveur le message du client
+        master.add(dest) ;
+        master.add(message) ;
     }
 
     private static boolean verifierSalon(String name) {
@@ -231,12 +309,9 @@ public class ChatamuCentral {
         return (entree.split(" ")[0].equals("LOGIN")) && (entree.split(" ").length == 2) ;
     }
 
-    private static boolean verifierMessage(String entree){
-        return (entree.split(" ")[0].equals("MESSAGE"));
-    }
 
     private static boolean verifierPseudo(String entree) {
-        for (SocketChannel sock : listeSocket) {
+        for (SocketChannel sock : listeSocketClient) {
             if (clientPseudo.get(sock.socket().getPort()).equals(entree)) {
                 return false;
             }
@@ -248,7 +323,7 @@ public class ChatamuCentral {
         return (entree.split(" ")[0].equals("SERVERCONNECT")) && (entree.split(" ").length == 2);
     }
 
-    private static boolean messageDeSalon(String entree) {
+    private static boolean gestionServeur(String entree) {
         return ((entree.split(" ")[0].equals("OPEN") || (entree.split(" ")[0].equals("CLOSE"))) && (entree.split(" ").length == 3)) ;
     }
 
@@ -264,7 +339,7 @@ public class ChatamuCentral {
     }
 
     private static SocketChannel getChan(ConcurrentLinkedQueue fileAttente) {
-        for (SocketChannel socketChannel : listeSocket){
+        for (SocketChannel socketChannel : listeSocketClient){
             if (socketChannelFileAttente.get(socketChannel) == fileAttente){
                 return socketChannel ;
             }
@@ -281,14 +356,6 @@ public class ChatamuCentral {
         return entrees[1];
     }
 
-    /* Messages client transmis sur les autres files */
-    private static void ajouterListes(String message, SocketChannel socketChannel){
-        for (ConcurrentLinkedQueue file : listeFileAttente) {
-            /* Que sur les autres files*/
-            if(! socketChannelFileAttente.get(socketChannel).equals(file))
-                file.add(message) ;
-        }
-    }
 
     /* Lorsqu'un client se déconnecte, on supprime sa file d'attente */
     private static void supprimerFileAttente(SocketChannel socketChannel){
@@ -297,6 +364,71 @@ public class ChatamuCentral {
 
         /* on supprime la file d'attente */
         socketChannelFileAttente.remove(socketChannel) ;
-        listeSocket.remove(socketChannel) ;
+        listeSocketClient.remove(socketChannel) ;
+    }
+
+    private static String trouverSalonClient(SocketChannel chan){
+        /* Pour chaque serveur on parcours sa liste de socketChannel */
+        ArrayList<SocketChannel> liste = new ArrayList<>() ;
+        for (String salon : serveursDisponnibles) {
+            liste = clientsParSalon.get(salon) ;
+            for (SocketChannel socketChannel : liste)
+                if(socketChannel.equals(chan))
+                    return salon ;
+        }
+        return null ;
+    }
+}
+
+
+class MasterReturn implements Runnable{
+
+    private ServerSocketChannel server;
+
+    public MasterReturn(ServerSocketChannel server){
+        this.server = server;
+    }
+
+    @Override
+    public void run() {
+        try {
+            while (true) {
+                //Thread.sleep(3000);
+                //System.out.println(MasterRecup.master.size());
+                if(MasterRecup.master.isEmpty())
+                    continue;
+                SocketChannel chan = (SocketChannel) MasterRecup.master.poll();
+                //System.out.println("dans la pile");
+                System.out.println(chan.toString());
+                String message = (String) MasterRecup.master.poll();
+                System.out.println(message);;
+                //chan.write(ByteBuffer.wrap(message.getBytes())) ;
+
+                SocketChannel client ;
+
+                if(chan.equals(MasterRecup.serveursNames.get("Slave1"))) {
+                    client = SocketChannel.open(new InetSocketAddress("127.0.0.1", 12346));
+                    //System.out.println(client.toString());
+                    client.write(ByteBuffer.wrap(message.getBytes()));
+                }
+                else if(chan.equals(MasterRecup.serveursNames.get("Slave2"))){
+                    client = SocketChannel.open(new InetSocketAddress("127.0.0.1", 12347));
+                    client.write(ByteBuffer.wrap(message.getBytes()));
+                }
+                else if(chan.equals(MasterRecup.serveursNames.get("Slave3"))){
+                    client = SocketChannel.open(new InetSocketAddress("127.0.0.1", 12348));
+                    client.write(ByteBuffer.wrap(message.getBytes()));
+                }
+                else {
+                    chan.write(ByteBuffer.wrap(message.getBytes())) ;
+                }
+
+                //chan.write(ByteBuffer.wrap(message.getBytes())) ;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.err.println("Fin de la session.");
+        exit(0);
     }
 }
