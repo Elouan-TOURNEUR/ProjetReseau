@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/PairsServer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/CausalBroadcast/Message.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/CausalBroadcast/PairsServer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/PairsServer.java" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -183,7 +185,9 @@
       <workItem from="1585419907690" duration="82000" />
       <workItem from="1585741506753" duration="7911000" />
       <workItem from="1585818263456" duration="1207000" />
-      <workItem from="1585838238626" duration="2756000" />
+      <workItem from="1585838238626" duration="3231000" />
+      <workItem from="1585903014622" duration="4016000" />
+      <workItem from="1585929125198" duration="4286000" />
     </task>
     <task id="LOCAL-00001" summary="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé">
       <created>1584557598849</created>
@@ -234,7 +238,14 @@
       <option name="project" value="LOCAL" />
       <updated>1585750239417</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="début pairs">
+      <created>1585846542317</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1585846542317</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -264,7 +275,8 @@
     <MESSAGE value="fédération de serveur" />
     <MESSAGE value="Correction petit bug" />
     <MESSAGE value="améliorations" />
-    <option name="LAST_COMMIT_MESSAGE" value="améliorations" />
+    <MESSAGE value="début pairs" />
+    <option name="LAST_COMMIT_MESSAGE" value="début pairs" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ProjetReseau$EchoClient.ic" NAME="EchoClient Coverage Results" MODIFIED="1584006174534" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
