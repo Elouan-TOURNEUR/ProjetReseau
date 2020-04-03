@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/CausalBroadcast/Message.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/CausalBroadcast/PairsServer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/PairsServer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ChatamuCentral.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ChatamuCentral.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -187,7 +184,7 @@
       <workItem from="1585818263456" duration="1207000" />
       <workItem from="1585838238626" duration="3231000" />
       <workItem from="1585903014622" duration="4016000" />
-      <workItem from="1585929125198" duration="4286000" />
+      <workItem from="1585929125198" duration="4393000" />
     </task>
     <task id="LOCAL-00001" summary="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé">
       <created>1584557598849</created>
@@ -245,7 +242,14 @@
       <option name="project" value="LOCAL" />
       <updated>1585846542317</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="début pairs">
+      <created>1585934142066</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1585934142066</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

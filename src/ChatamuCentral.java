@@ -1,5 +1,4 @@
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -10,7 +9,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static java.lang.System.exit;
-import static java.lang.System.setOut;
 
 public class ChatamuCentral {
 
@@ -233,7 +231,7 @@ class MasterRecup implements Runnable{
         }
         else {
             String name = entree.split(" ")[1] ;
-            if (verifierSalon(name)) {
+            if (verifierServeur(name)) {
                 chan.write(ByteBuffer.wrap("ok".getBytes()));
                 clientsParSalon.get(name).add(chan);
                 SocketChannel serveur = serveursNames.get(name) ;
@@ -308,7 +306,7 @@ class MasterRecup implements Runnable{
         master.add(message) ;
     }
 
-    private static boolean verifierSalon(String name) {
+    private static boolean verifierServeur(String name) {
         for(String salon : serveursDisponnibles){
             if (salon.equals(name))
                 return true ;
