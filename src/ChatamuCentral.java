@@ -240,7 +240,7 @@ class MasterRecup implements Runnable{
                 String pseudo = clientPseudo.get(chan.socket().getPort()) ;
                 master.add(serveur) ;
                 master.add(pseudo) ;
-                System.out.println(pseudo + " a rejoin le serveur " + name);
+                System.out.println(pseudo + " a rejoint le serveur " + name);
             }
             else {
                 chan.write(ByteBuffer.wrap("ERROR SERVER NAME".getBytes()));
