@@ -9,8 +9,8 @@ public class Message {
     SocketChannel emetteur ;
     SocketChannel destinataire ;
 
-    public Message(String message) {
-        this.broadcast = new Vector<Integer>();
+    public Message(String message, Vector<Integer> vector) {
+        this.broadcast = vector;
         this.message = message;
     }
 }
