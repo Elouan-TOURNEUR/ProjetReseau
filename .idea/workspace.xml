@@ -2,9 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/CausalBroadcast/PairsClient.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CausalBroadcast/Message.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CausalBroadcast/Message.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CausalBroadcast/PairsServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CausalBroadcast/PairsServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ChatamuCentral.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ChatamuCentral.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SlaveServeur.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SlaveServeur.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -44,7 +45,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Compound.PairServer">
+  <component name="RunManager" selected="Compound.Cluster">
     <configuration name="0 Salon central" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="SalonCentral" />
       <module name="Projet_Reseaux" />
@@ -220,7 +221,9 @@
       <workItem from="1585992217330" duration="4896000" />
       <workItem from="1586075980428" duration="15153000" />
       <workItem from="1586162335714" duration="11392000" />
-      <workItem from="1586209487207" duration="4302000" />
+      <workItem from="1586209487207" duration="10890000" />
+      <workItem from="1586271875955" duration="847000" />
+      <workItem from="1586337160121" duration="7905000" />
     </task>
     <task id="LOCAL-00001" summary="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé">
       <created>1584557598849</created>
@@ -292,7 +295,14 @@
       <option name="project" value="LOCAL" />
       <updated>1585934265166</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="avancement pairsServer">
+      <created>1586251771880</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1586251771880</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -324,7 +334,8 @@
     <MESSAGE value="améliorations" />
     <MESSAGE value="début pairs" />
     <MESSAGE value="?" />
-    <option name="LAST_COMMIT_MESSAGE" value="?" />
+    <MESSAGE value="avancement pairsServer" />
+    <option name="LAST_COMMIT_MESSAGE" value="avancement pairsServer" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ProjetReseau$EchoClient.ic" NAME="EchoClient Coverage Results" MODIFIED="1584006174534" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />

@@ -32,7 +32,7 @@ public class SlaveServeur {
     private static List<String>  clients = new ArrayList<>() ;
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         int argc = args.length;
         int port = 0 ;
         String ip = "" ;
@@ -150,7 +150,7 @@ public class SlaveServeur {
             client.write(ByteBuffer.wrap(messageRetourne.getBytes()));
         }
     }
-    private static void traiterMessage(String entree, SocketChannel chan, Selector select) throws IOException {
+    private static void traiterMessage(String entree, SocketChannel chan, Selector select) throws IOException, InterruptedException {
         System.out.println("Je traite un message");
         /*if(entree.equals("exit")) {
             supprimerFileAttente(chan);
@@ -178,11 +178,14 @@ public class SlaveServeur {
             System.out.println("j'envoie " + messageRetourne);
 
             for (String c : clients) {
+                Thread.sleep(100);
                 String messageClient = c + " " + messageTraite;
-                client.write(ByteBuffer.wrap(messageClient.getBytes()));
                 System.out.println("j'envoie " + messageClient);
-
+                client.write(ByteBuffer.wrap(messageClient.getBytes()));
             }
+
+
+
             /* On récupère le SocketChannel de la file d'attente
             SocketChannel channel = getChan(file) ;
             channel.configureBlocking(false) ;

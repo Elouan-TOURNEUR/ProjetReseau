@@ -93,12 +93,12 @@ class MasterRecup implements Runnable{
                 Iterator<SelectionKey> keys = select.selectedKeys().iterator();
 
                 while (keys.hasNext()) {
-                    if (System.nanoTime()/1000000000 - timeReferant/1000000000 > 180)
+                    /*if (System.nanoTime()/1000000000 - timeReferant/1000000000 > 180)
                         return ;
                     if (System.nanoTime()/1000000000 - time/1000000000 > 15) {
                         Thread.sleep(10000);
                         time = System.nanoTime() ;
-                    }
+                    }*/
                     SelectionKey key = keys.next();
 
                     if (key.isReadable()) {
@@ -106,6 +106,7 @@ class MasterRecup implements Runnable{
                         chan.configureBlocking(false);
 
                         try {
+                            buffer.clear() ;
                             chan.read(buffer);
                         } catch (IOException e) {
                             chan.close();
@@ -113,6 +114,7 @@ class MasterRecup implements Runnable{
                         }
                         ByteBuffer msg = buffer.flip();
                         String entree = new String(msg.array()).trim();
+                        System.out.println("recu " + entree);
                         if (gestionServeur(entree))
                             traiterGestionServeur(entree, chan);
                         else if (messageServeur(chan)){
@@ -120,9 +122,11 @@ class MasterRecup implements Runnable{
                         }
                         else if (clientSurAucunServer(chan) && clientPseudo.containsKey(chan.socket().getPort())) {
                             traiterConnexionSalon(entree, chan);
-                        } else if (clientPseudo.containsKey(chan.socket().getPort())) {
+                        }
+                        else if (clientPseudo.containsKey(chan.socket().getPort())) {
                             traiterMessageClient(entree, chan, select);
-                        } else if (!clientPseudo.containsKey(chan.socket().getPort())) {
+                        }
+                        else if (!clientPseudo.containsKey(chan.socket().getPort())) {
                             traiterLogin(entree, chan);
                         }
                         buffer = ByteBuffer.allocate(128);
@@ -246,15 +250,16 @@ class MasterRecup implements Runnable{
         }
     }
 
-    private void traiterMessageServeur(String entree, SocketChannel chan, Selector select) throws IOException {
+    private void traiterMessageServeur(String entree, SocketChannel chan, Selector select) throws IOException, InterruptedException {
         System.out.println("je recois message de serveur");
         if (serveursDisponnibles.contains(entree.split(" ")[0])){
+            System.out.println("Message pour réplication.");
             String nomEmetteur = entree.split(" ")[0] ;
             String message = recupererContenuMessage(entree) ;
             String messageTraite = "[SALON] " + message ;
             for(String serveur : serveursDisponnibles){
                 if (serveur.equals(nomEmetteur))
-                        continue;
+                    continue;
                 else {
                     SocketChannel ServeurARepliquer = serveursNames.get(serveur) ;
                     //System.out.println(ServeurARepliquer.toString());
@@ -264,10 +269,11 @@ class MasterRecup implements Runnable{
             }
         }
         else {
+            System.out.println("Message : " + entree);
             String message = recupererContenuMessage(entree) ;
             //System.out.println(entree);
             SocketChannel client = pseudoChannel.get(entree.split(" ")[0]) ;
-            System.out.println(client.toString());
+            //.out.println(client.toString());
 
             master.add(client) ;
             master.add(message) ;
@@ -402,7 +408,7 @@ class MasterReturn implements Runnable{
     public void run() {
         try {
             while (true) {
-                Thread.sleep(1000);
+                //Thread.sleep(1000);
                 if(MasterRecup.master.isEmpty())
                     continue;
                 SocketChannel chan = (SocketChannel) MasterRecup.master.poll();
@@ -418,7 +424,7 @@ class MasterReturn implements Runnable{
                     chan.write(ByteBuffer.wrap(message.getBytes())) ;
                 }
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         System.err.println("Fin de la session.");
