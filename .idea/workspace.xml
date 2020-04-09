@@ -2,10 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/CausalBroadcast/PairsClient.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ChatamuCentral.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ChatamuCentral.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SlaveServeur.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SlaveServeur.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CausalBroadcast/PairsClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CausalBroadcast/PairsClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CausalBroadcast/PairsServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CausalBroadcast/PairsServer.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -45,7 +44,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Compound.Cluster">
+  <component name="RunManager" selected="Compound.PairServer">
     <configuration name="0 Salon central" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="SalonCentral" />
       <module name="Projet_Reseaux" />
@@ -110,6 +109,30 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="PairsClient 1" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="CausalBroadcast.PairsClient" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="localhost 12340" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="PairsClient 2" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="CausalBroadcast.PairsClient" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="localhost 12340" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="PairsClient 3" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="CausalBroadcast.PairsClient" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="localhost 12340" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="SlaveServeur 1" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="SlaveServeur" />
       <module name="Projet_Reseaux" />
@@ -145,9 +168,12 @@
       <method v="2" />
     </configuration>
     <configuration name="PairServer" type="CompoundRunConfigurationType">
-      <toRun name="PairServeur" type="Application" />
       <toRun name="PairServeur 3" type="Application" />
       <toRun name="PairServeur 2" type="Application" />
+      <toRun name="PairServeur" type="Application" />
+      <toRun name="PairsClient 3" type="Application" />
+      <toRun name="PairsClient 2" type="Application" />
+      <toRun name="PairsClient 1" type="Application" />
       <method v="2" />
     </configuration>
     <configuration name="Salon central" type="CompoundRunConfigurationType">
@@ -171,6 +197,9 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Application.PairsClient 1" />
+      <item itemvalue="Application.PairsClient 2" />
+      <item itemvalue="Application.PairsClient 3" />
       <item itemvalue="Application.PairServeur 3" />
       <item itemvalue="Application.PairServeur" />
       <item itemvalue="Application.0 Salon central" />
@@ -223,7 +252,8 @@
       <workItem from="1586162335714" duration="11392000" />
       <workItem from="1586209487207" duration="10890000" />
       <workItem from="1586271875955" duration="847000" />
-      <workItem from="1586337160121" duration="7905000" />
+      <workItem from="1586337160121" duration="10106000" />
+      <workItem from="1586423931130" duration="6647000" />
     </task>
     <task id="LOCAL-00001" summary="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé">
       <created>1584557598849</created>
@@ -302,7 +332,14 @@
       <option name="project" value="LOCAL" />
       <updated>1586251771880</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="correction bugs">
+      <created>1586350569604</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1586350569604</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -335,7 +372,8 @@
     <MESSAGE value="début pairs" />
     <MESSAGE value="?" />
     <MESSAGE value="avancement pairsServer" />
-    <option name="LAST_COMMIT_MESSAGE" value="avancement pairsServer" />
+    <MESSAGE value="correction bugs" />
+    <option name="LAST_COMMIT_MESSAGE" value="correction bugs" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ProjetReseau$EchoClient.ic" NAME="EchoClient Coverage Results" MODIFIED="1584006174534" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />

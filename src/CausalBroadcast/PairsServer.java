@@ -147,15 +147,10 @@ class PairReturn implements Runnable{
     @Override
     public void run() {
         try {
-            String debut;
-
-            System.out.println("Start");
-            Scanner scan = new Scanner(System.in);
-            debut = scan.nextLine();
-            Thread.sleep(2000);
+            Thread.sleep(4000);
             initialiserCo() ;
             while (true) {
-                Thread.sleep(1000);
+                //Thread.sleep(1000);
                 if(pair.isEmpty())
                     continue;
                 SocketChannel chan = (SocketChannel) pair.poll();
@@ -164,10 +159,8 @@ class PairReturn implements Runnable{
                     traiterInitialiserCo(chan, message);
                 else if (messageServeur(chan))
                     traiterMessageServeur(chan, message) ;
-                else if (!clientPseudo.containsKey(chan))
+                else if (!clientPseudo.containsKey(chan.socket().getPort()))
                     traiterLogin(message, chan);
-                else if (stateClient.get(chan).equals(STATE_SERVERCONNECT))
-                    traiterServerConnect(message, chan) ;
                 else if (stateClient.get(chan).equals(STATE_MESSAGE))
                     traiterMessageClient(message, chan);
             }
@@ -211,7 +204,7 @@ class PairReturn implements Runnable{
         listSocketServeurs.add(chan) ;
         serveursDisponnibles.add(nom) ;
     }
-
+/**
     private void traiterServerConnect(String message, SocketChannel chan) throws IOException {
         if(!verifierCoServeur(message)){
             chan.write(ByteBuffer.wrap("ERROR SERVER".getBytes()));
@@ -232,7 +225,7 @@ class PairReturn implements Runnable{
                 chan.write(ByteBuffer.wrap("ERROR SERVER NAME".getBytes()));
             }
         }
-    }
+    }**/
 
     private static boolean verifierCoServeur(String entree){
         return (entree.split(" ")[0].equals("SERVERCONNECT")) && (entree.split(" ").length == 2);
@@ -288,7 +281,7 @@ class PairReturn implements Runnable{
     }
 
     private void co_delivery(String message) throws IOException {
-            System.out.println("Co_delivery");
+            System.out.println("Je traite Co_delivery");
             String pseudo = message.split(" ")[0] ;
             System.out.println(message);
             for (String c : clients) {
@@ -298,6 +291,7 @@ class PairReturn implements Runnable{
     }
 
     private void traiterMessageClient(String message, SocketChannel chan) throws IOException {
+        System.out.println("Je traite messageClient");
         if (verifierMessage(message)) {
             String pseudo = clientPseudo.get(chan.socket().getPort()) ;
             String messageTraite = pseudo + "> " + recupererContenuMessage(message) ;
@@ -317,6 +311,8 @@ class PairReturn implements Runnable{
 
 
     private void co_broadcast(Message message) throws IOException {
+        System.out.println("Je traite co_broadcast");
+
         /*
         pour chaque autre serveur, on envoie CO_BR(message, vector[1..nbServeur])
         vector[i] = vector[i] + 1
@@ -351,6 +347,7 @@ class PairReturn implements Runnable{
 
 
     private static void traiterLogin(String entree, SocketChannel chan) throws IOException {
+        System.out.println("Je traite login");
         if(!verifierConnexion(entree)){
             chan.write(ByteBuffer.wrap("ERROR LOGIN aborting chatamu protocol".getBytes()));
         }
@@ -362,12 +359,9 @@ class PairReturn implements Runnable{
             int portSocket = chan.socket().getPort();
             clientPseudo.put(portSocket, pseudo);
             clientSocket.put(pseudo, chan) ;
-
-            String listeServeur = "" ;
-            for (String serveur : serveursDisponnibles) {
-                listeServeur += serveur + '\n' ;
-            }
-            chan.write(ByteBuffer.wrap(listeServeur.getBytes())) ;
+            clients.add(pseudo) ;
+            stateClient.put(chan, STATE_MESSAGE) ;
+            chan.write(ByteBuffer.wrap("ok".getBytes())) ;
         }
     }
 
@@ -379,10 +373,10 @@ class PairReturn implements Runnable{
     private static boolean verifierPseudo(String entree) {
         for (String client : clients) {
             if (client.equals(entree)) {
-                return true;
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     private static String recupererContenuLogin(String entree){

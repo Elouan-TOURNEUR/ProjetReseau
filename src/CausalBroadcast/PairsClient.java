@@ -73,42 +73,6 @@ public class PairsClient {
                 System.out.println("Pseudo déja pris.");
                 traiterLogin(client, buffer);
             } else {
-                System.out.println(reponseLogin);
-                traiterServerConnect(client);
-            }
-
-        } catch (IOException e) {
-            System.err.println("Erreur E/S socket");
-            e.printStackTrace();
-            exit(8);
-        }
-    }
-
-    private static void traiterServerConnect(SocketChannel client) {
-        ByteBuffer buffer = ByteBuffer.allocate(128);
-
-        try {
-            String reponseServerConnect;
-            String entreeServerConnect;
-
-            System.out.println("SERVERCONNECT nom");
-            Scanner scan = new Scanner(System.in);
-            entreeServerConnect = scan.nextLine();
-
-            client.write(ByteBuffer.wrap(entreeServerConnect.getBytes()));
-            buffer.clear();
-            client.read(buffer);
-
-            reponseServerConnect = (buffer != null) ? new String(buffer.array()).trim() : "";
-            if (reponseServerConnect.equals("ERROR SERVER")) {
-                System.out.println("Syntaxe invalide.");
-                buffer.clear();
-                traiterServerConnect(client);
-            } else if (reponseServerConnect.equals("ERROR SERVER NAME")) {
-                System.out.println("Serveur invalide.");
-                traiterServerConnect(client);
-            }
-            else {
                 System.out.println("Vous avez rejoin le server avec succès.");
                 Thread threadRead = new Thread(new ReadMessages(client));
                 Thread threadWrite = new Thread(new WriteMessages(client));
@@ -122,6 +86,8 @@ public class PairsClient {
             exit(8);
         }
     }
+
+
 }
 
 class ReadMessages implements Runnable{
