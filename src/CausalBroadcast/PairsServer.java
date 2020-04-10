@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static java.lang.System.exit;
+import static java.lang.System.in;
 
 /*
  -  attribuer une horloge vectorielle à chaque message diffusé et à utiliser les informations de causalité dans l'horloge vectorielle
@@ -127,7 +128,7 @@ class PairReturn implements Runnable{
 
 
 
-    public static SocketChannel[] serverOrder = new SocketChannel[0];
+    public static Integer[] serverOrder = new Integer[PairsServer.nbPairs];
 
     public static ConcurrentLinkedQueue pair = new ConcurrentLinkedQueue() ;
 
@@ -136,7 +137,9 @@ class PairReturn implements Runnable{
 
     public static HashMap<SocketChannel, Integer> stateClient = new HashMap<>() ;
 
-    private static Vector<Integer> broadcast = new Vector<>(PairsServer.nbPairs);
+    private static Vector<Integer> broadcast = new Vector(PairsServer.nbPairs);
+
+    private static SocketChannel[] socketCoServer = new SocketChannel[2] ;
 
 
 
@@ -148,9 +151,11 @@ class PairReturn implements Runnable{
     public void run() {
         try {
             Thread.sleep(4000);
+            broadcast.setSize(PairsServer.nbPairs);
+
             initialiserCo() ;
             while (true) {
-                //Thread.sleep(1000);
+                Thread.sleep(1000);
                 if(pair.isEmpty())
                     continue;
                 SocketChannel chan = (SocketChannel) pair.poll();
@@ -182,14 +187,19 @@ class PairReturn implements Runnable{
 
     private static void initialiserCo() throws IOException {
         Integer port = 12339 ;
+        Integer indice_socketCoServer = 0 ;
         for (int i = 0; i < PairsServer.nbPairs; i++) {
             ++port ;
+            serverOrder[i] = port ;
+            broadcast.set(i, 0) ;
             if (port.equals(PairsServer.port)){
                 System.out.println("c'est moi");
                 continue;
             }
             System.out.println("j'envoi un message chez " + port);
             client = SocketChannel.open(new InetSocketAddress("127.0.0.1", port));
+            socketCoServer[indice_socketCoServer] = client ;
+            ++indice_socketCoServer ;
             String messageReady = "INITIALISER " + PairsServer.name ;
             client.write(ByteBuffer.wrap(messageReady.getBytes()));
         }
@@ -198,12 +208,13 @@ class PairReturn implements Runnable{
     private static void traiterInitialiserCo(SocketChannel chan, String message) {
         System.out.println(message);
         String nom = recupererContenuMessage(message) ;
-        Integer port = chan.socket().getPort() ;
+        Integer port = chan.socket().getLocalPort() ;
         System.out.println(port);
         serveursNames.put(nom, chan) ;
         listSocketServeurs.add(chan) ;
         serveursDisponnibles.add(nom) ;
     }
+
 /**
     private void traiterServerConnect(String message, SocketChannel chan) throws IOException {
         if(!verifierCoServeur(message)){
@@ -240,7 +251,9 @@ class PairReturn implements Runnable{
     }
 
     private boolean messageServeur(SocketChannel chan) {
+        System.out.println(chan.toString());
         for (SocketChannel socketChannel : listSocketServeurs){
+            System.out.println(socketChannel.toString());
             if (chan.equals(socketChannel))
                 return true ;
         }
@@ -248,16 +261,19 @@ class PairReturn implements Runnable{
     }
 
     private void traiterMessageServeur(SocketChannel chan, String message) throws IOException {
+        System.out.println("Je traite messageServer");
         String stringVector = message.split(" ")[0] ;
         Vector<Integer> vector = new Vector() ;
         for (int i = 0; i < PairsServer.nbPairs ; i++) {
-            vector.set(i, Integer.parseInt(stringVector.split("")[i])) ;
+            System.out.println(Integer.parseInt(stringVector.split("")[i]));
+            //vector.set(i, Integer.parseInt(stringVector.split("")[i])) ;
         }
         Message messageObjet = new Message(message, vector) ;
         receive_co_broadcast(messageObjet, chan);
     }
 
     private void receive_co_broadcast(Message message, SocketChannel channel) throws  IOException {
+        System.out.println("Je traite receive co_broadcast");
         if (!traitementPossible(message)){
             String envoi = message.broadcast.toString() + " " + message.message ;
             pair.add(channel) ;
@@ -325,9 +341,25 @@ class PairReturn implements Runnable{
 
          */
 
+
+        /**
         String envoi = message.broadcast.toString() + " " + message.message ;
         for (SocketChannel socketChannel : listSocketServeurs) {
             client = SocketChannel.open(new InetSocketAddress("127.0.0.1", socketChannelServerPort.get(socketChannel)));
+            client.write(ByteBuffer.wrap(envoi.getBytes()));
+        }
+         **/
+        Integer port = 12339 ;
+        Integer indice_socketCoServeur = 0 ;
+        String envoi = message.broadcast.toString() + " " + message.message ;
+        for (int i = 0; i < PairsServer.nbPairs; i++) {
+            ++port ;
+            if (port.equals(PairsServer.port)){
+                continue;
+            }
+            System.out.println("j'envoi un message chez " + port);
+            client = socketCoServer[indice_socketCoServeur];
+            ++indice_socketCoServeur ;
             client.write(ByteBuffer.wrap(envoi.getBytes()));
         }
         for (int i = 0 ; i < listSocketServeurs.size() ; i++) {
