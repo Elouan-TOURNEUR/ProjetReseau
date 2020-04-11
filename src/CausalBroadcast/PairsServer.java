@@ -262,15 +262,24 @@ class PairReturn implements Runnable{
 
     private void traiterMessageServeur(SocketChannel chan, String message) throws IOException {
         System.out.println("Je traite messageServer");
-        String stringVector = message.split(" ")[0] ;
-        Vector<Integer> vector = new Vector() ;
+        String stringVector = message.split(" ")[0] + message.split(" ")[1] + message.split(" ")[2] ;
+        System.out.println(stringVector);
+        Vector<Integer> vector = new Vector(PairsServer.nbPairs) ;
+        vector.setSize(PairsServer.nbPairs);
+        int indice = 1 ;
+        String str ;
         for (int i = 0; i < PairsServer.nbPairs ; i++) {
-            System.out.println(Integer.parseInt(stringVector.split("")[i]));
+            str = Character.toString(stringVector.charAt(indice)) ;
+            System.out.println(str);
+            indice = indice + 2 ;
+            vector.set(i, Integer.parseInt(str)) ;
+            //System.out.println(Integer.parseInt(stringVector.split("")[i]));
             //vector.set(i, Integer.parseInt(stringVector.split("")[i])) ;
         }
         Message messageObjet = new Message(message, vector) ;
         receive_co_broadcast(messageObjet, chan);
     }
+
 
     private void receive_co_broadcast(Message message, SocketChannel channel) throws  IOException {
         System.out.println("Je traite receive co_broadcast");

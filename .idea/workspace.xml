@@ -253,7 +253,8 @@
       <workItem from="1586271875955" duration="847000" />
       <workItem from="1586337160121" duration="10106000" />
       <workItem from="1586423931130" duration="7599000" />
-      <workItem from="1586513336920" duration="8702000" />
+      <workItem from="1586513336920" duration="8889000" />
+      <workItem from="1586600117175" duration="2371000" />
     </task>
     <task id="LOCAL-00001" summary="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé">
       <created>1584557598849</created>
@@ -346,7 +347,14 @@
       <option name="project" value="LOCAL" />
       <updated>1586441280323</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="pairsServer">
+      <created>1586528915943</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1586528915943</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -381,7 +389,8 @@
     <MESSAGE value="avancement pairsServer" />
     <MESSAGE value="correction bugs" />
     <MESSAGE value="avancement" />
-    <option name="LAST_COMMIT_MESSAGE" value="avancement" />
+    <MESSAGE value="pairsServer" />
+    <option name="LAST_COMMIT_MESSAGE" value="pairsServer" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ProjetReseau$EchoClient.ic" NAME="EchoClient Coverage Results" MODIFIED="1584006174534" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
