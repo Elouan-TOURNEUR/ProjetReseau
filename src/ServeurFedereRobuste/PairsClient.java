@@ -71,6 +71,7 @@ public class PairsClient {
                 clients[i].write(ByteBuffer.wrap(entreeLogin.getBytes()));
             }
             clients[2].read(buffer);
+            System.out.println(buffer);
 
             reponseLogin = (buffer != null) ? new String(buffer.array()).trim() : "";
             buffer.clear();

@@ -3,14 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/launch.bash" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CausalBroadcast/Message.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CausalBroadcast/PairsClient.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CausalBroadcast/PairsServer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ChatamuCentral.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/EchoClient.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SalonCentral.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SlaveServeur.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsServer.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />

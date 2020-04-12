@@ -399,7 +399,7 @@ class PairReturn implements Runnable{
             clientSocket.put(pseudo, chan) ;
             clients.add(pseudo) ;
             stateClient.put(chan, STATE_MESSAGE) ;
-            //chan.write(ByteBuffer.wrap("ok".getBytes())) ;
+            chan.write(ByteBuffer.wrap("ok".getBytes())) ;
         }
     }
 
