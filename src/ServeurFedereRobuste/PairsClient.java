@@ -10,6 +10,10 @@ import static java.lang.System.exit;
 
 public class PairsClient {
 
+    public static ReadMessages readMessages;
+    public static WriteMessages writeMessages;
+    private static SocketChannel[] listeClientServer;
+
     public static void main(String[] args) throws IOException {
         Socket echoSocket; // la socket client
         String ip; // adresse IPv4 du serveur en notation pointée
@@ -34,7 +38,7 @@ public class PairsClient {
         System.out.println("Essai de connexion à  " + ip + " sur le port " + port + "\n");
 
 
-        SocketChannel[] listeClientServer = new SocketChannel[3] ;
+        listeClientServer = new SocketChannel[3] ;
         SocketChannel clientServer1 = null;
         listeClientServer[0] = clientServer1 ;
         SocketChannel clientServer2 = null;
@@ -85,8 +89,10 @@ public class PairsClient {
                 traiterLogin(clients, buffer);
             } else {
                 System.out.println("Vous avez rejoin le server avec succès.");
-                Thread threadRead = new Thread(new ReadMessages(clients[2]));
-                Thread threadWrite = new Thread(new WriteMessages(clients[2]));
+                readMessages = new ReadMessages(clients[2]);
+                writeMessages = new WriteMessages(clients[2]);
+                Thread threadRead = new Thread(readMessages);
+                Thread threadWrite = new Thread(writeMessages);
                 threadRead.start();
                 threadWrite.start();
             }
@@ -99,13 +105,24 @@ public class PairsClient {
     }
 
 
+    public static SocketChannel chercherUnAutreServeur() {
+        for(SocketChannel chan : listeClientServer){
+            if(chan.isConnected())
+                return chan;
+        }
+        return null;
+    }
 }
 
 class ReadMessages implements Runnable{
 
-    private SocketChannel client;
+    private volatile SocketChannel client;
 
     public ReadMessages(SocketChannel client){
+        this.client = client;
+    }
+
+    public void setClient(SocketChannel client){
         this.client = client;
     }
 
@@ -127,8 +144,8 @@ class ReadMessages implements Runnable{
             }
         } catch (IOException e) {
             System.out.println("ouaiss");
-            //e.printStackTrace();
-            //exit(0);
+            this.client = PairsClient.chercherUnAutreServeur();
+            PairsClient.writeMessages.setClient(this.client);
         }
     }
 }
@@ -136,9 +153,13 @@ class ReadMessages implements Runnable{
 
 class WriteMessages implements Runnable{
 
-    private SocketChannel client;
+    private volatile SocketChannel client;
 
     public WriteMessages(SocketChannel client){
+        this.client = client;
+    }
+
+    public void setClient(SocketChannel client){
         this.client = client;
     }
 
@@ -162,7 +183,13 @@ class WriteMessages implements Runnable{
                     exit(0);
                 }
 
-                client.write(ByteBuffer.wrap(entreeMessage.getBytes()));
+                try {
+                    client.write(ByteBuffer.wrap(entreeMessage.getBytes()));
+                } catch (IOException e){
+                    this.client = PairsClient.chercherUnAutreServeur();
+                    PairsClient.readMessages.setClient(this.client);
+                }
+
                 buffer.flip();
             }
 

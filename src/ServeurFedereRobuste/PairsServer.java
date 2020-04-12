@@ -137,7 +137,7 @@ class PairReturn implements Runnable{
 
     public static HashMap<SocketChannel, Integer> stateClient = new HashMap<>() ;
 
-    private static Vector<Integer> broadcast = new Vector(PairsServer.nbPairs);
+    private static Vector<Integer> broadcast = new Vector<>(PairsServer.nbPairs);
 
     private static SocketChannel[] socketCoServer = new SocketChannel[2] ;
 
@@ -264,7 +264,7 @@ class PairReturn implements Runnable{
         System.out.println("Je traite messageServer");
         String stringVector = message.split(" ")[0] + message.split(" ")[1] + message.split(" ")[2] ;
         System.out.println(stringVector);
-        Vector<Integer> vector = new Vector(PairsServer.nbPairs) ;
+        Vector<Integer> vector = new Vector<>(PairsServer.nbPairs) ;
         vector.setSize(PairsServer.nbPairs);
         int indice = 1 ;
         String str ;
@@ -288,8 +288,8 @@ class PairReturn implements Runnable{
             pair.add(channel) ;
             pair.add(envoi) ;
             System.out.println("Pas le moment.");
-
         }
+
         co_delivery(message.message);
         int indice = trouverIndice(channel) ;
         for (int i = 0 ; i < listSocketServeurs.size() ; i++) {
@@ -304,7 +304,7 @@ class PairReturn implements Runnable{
         }
         return true ;
     }
-
+    
     private void co_delivery(String message) throws IOException {
         System.out.println("Je traite Co_delivery");
         String pseudo = message.split(" ")[0] ;
@@ -366,11 +366,19 @@ class PairReturn implements Runnable{
             System.out.println("j'envoi un message chez " + port);
             client = socketCoServer[indice_socketCoServeur];
             ++indice_socketCoServeur ;
-            client.write(ByteBuffer.wrap(envoi.getBytes()));
+
+            try {
+                if(client.isConnected())
+                    client.write(ByteBuffer.wrap(envoi.getBytes()));
+            } catch (IOException e){
+                continue;
+            }
         }
+
         for (int i = 0 ; i < listSocketServeurs.size() ; i++) {
             broadcast.set(i, Math.max(broadcast.get(i), message.broadcast.get(i))) ;
         }
+
         co_delivery(message.message) ;
     }
 
