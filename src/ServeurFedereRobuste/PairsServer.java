@@ -260,7 +260,7 @@ class PairReturn implements Runnable{
         return false ;
     }
 
-    private void traiterMessageServeur(SocketChannel chan, String message) throws IOException {
+    private void traiterMessageServeur(SocketChannel chan, String message) throws IOException, InterruptedException {
         System.out.println("Je traite messageServer");
         String stringVector = message.split(" ")[0] + message.split(" ")[1] + message.split(" ")[2] ;
         System.out.println(stringVector);
@@ -270,7 +270,7 @@ class PairReturn implements Runnable{
         String str ;
         for (int i = 0; i < PairsServer.nbPairs ; i++) {
             str = Character.toString(stringVector.charAt(indice)) ;
-            System.out.println(str);
+            //System.out.println(str);
             indice = indice + 2 ;
             vector.set(i, Integer.parseInt(str)) ;
             //System.out.println(Integer.parseInt(stringVector.split("")[i]));
@@ -281,7 +281,7 @@ class PairReturn implements Runnable{
     }
 
 
-    private void receive_co_broadcast(Message message, SocketChannel channel) throws  IOException {
+    private void receive_co_broadcast(Message message, SocketChannel channel) throws IOException, InterruptedException {
         System.out.println("Je traite receive co_broadcast");
         if (!traitementPossible(message)){
             String envoi = message.broadcast.toString() + " " + message.message ;
@@ -305,17 +305,18 @@ class PairReturn implements Runnable{
         return true ;
     }
     
-    private void co_delivery(String message) throws IOException {
+    private void co_delivery(String message) throws IOException, InterruptedException {
         System.out.println("Je traite Co_delivery");
         String pseudo = message.split(" ")[0] ;
         System.out.println(message);
         for (String c : clients) {
+            Thread.sleep(500);
             SocketChannel chan = clientSocket.get(c) ;
             chan.write(ByteBuffer.wrap(message.getBytes()));
         }
     }
 
-    private void traiterMessageClient(String message, SocketChannel chan) throws IOException {
+    private void traiterMessageClient(String message, SocketChannel chan) throws IOException, InterruptedException {
         System.out.println("Je traite messageClient");
         if (verifierMessage(message)) {
             String pseudo = clientPseudo.get(chan.socket().getPort()) ;
@@ -335,7 +336,7 @@ class PairReturn implements Runnable{
     }
 
 
-    private void co_broadcast(Message message) throws IOException {
+    private void co_broadcast(Message message) throws IOException, InterruptedException {
         System.out.println("Je traite co_broadcast");
 
         /*
@@ -378,7 +379,6 @@ class PairReturn implements Runnable{
         for (int i = 0 ; i < listSocketServeurs.size() ; i++) {
             broadcast.set(i, Math.max(broadcast.get(i), message.broadcast.get(i))) ;
         }
-
         co_delivery(message.message) ;
     }
 

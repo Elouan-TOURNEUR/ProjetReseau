@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.sql.SQLOutput;
 import java.util.Scanner;
 
 import static java.lang.System.exit;
@@ -12,7 +13,7 @@ public class PairsClient {
 
     public static ReadMessages readMessages;
     public static WriteMessages writeMessages;
-    private static SocketChannel[] listeClientServer;
+    public static SocketChannel[] listeClientServer;
 
     public static void main(String[] args) throws IOException {
         Socket echoSocket; // la socket client
@@ -52,7 +53,6 @@ public class PairsClient {
             for (int i = 0; i < 3 ; i++) {
                 listeClientServer[i] = SocketChannel.open(new InetSocketAddress(ip, port + i));
             }
-            System.out.println(listeClientServer.toString());
             buffer = ByteBuffer.allocate(256);
         } catch (IOException e) {
             System.err.println("Connexion: hôte inconnu : " + ip);
@@ -75,7 +75,6 @@ public class PairsClient {
                 clients[i].write(ByteBuffer.wrap(entreeLogin.getBytes()));
             }
             clients[2].read(buffer);
-            System.out.println(buffer);
 
             reponseLogin = (buffer != null) ? new String(buffer.array()).trim() : "";
             buffer.clear();
@@ -106,11 +105,14 @@ public class PairsClient {
 
 
     public static SocketChannel chercherUnAutreServeur() {
-        for(SocketChannel chan : listeClientServer){
+        /**for(SocketChannel chan : listeClientServer){
             if(chan.isConnected())
                 return chan;
         }
         return null;
+         **/
+        return listeClientServer[1] ;
+
     }
 }
 
@@ -128,9 +130,15 @@ class ReadMessages implements Runnable{
 
     @Override
     public void run() {
+        while (!WriteMessages.estPret){
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         ByteBuffer buffer = ByteBuffer.allocate(128);
         String reponseMessage;
-
         try {
             while (true) {
                 client.read(buffer);
@@ -143,9 +151,18 @@ class ReadMessages implements Runnable{
                 buffer = ByteBuffer.allocate(128);
             }
         } catch (IOException e) {
-            System.out.println("ouaiss");
             this.client = PairsClient.chercherUnAutreServeur();
             PairsClient.writeMessages.setClient(this.client);
+            ReadMessages readMessages = new ReadMessages(PairsClient.listeClientServer[1]);
+            Thread threadRead = new Thread(readMessages);
+            WriteMessages.estPret = false ;
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+            threadRead.start();
+
         }
     }
 }
@@ -154,6 +171,7 @@ class ReadMessages implements Runnable{
 class WriteMessages implements Runnable{
 
     private volatile SocketChannel client;
+    static public boolean estPret ;
 
     public WriteMessages(SocketChannel client){
         this.client = client;
@@ -174,6 +192,7 @@ class WriteMessages implements Runnable{
             while (true) {
                 System.out.println("MESSAGE message");
                 entreeMessage = scan.nextLine();
+                estPret = true ;
 
                 if(entreeMessage.equals("exit")){
                     System.out.println("c'est la fin j'envoie un dernier message au serveur.");
