@@ -33,13 +33,22 @@ public class PairsClient {
         /* Connexion */
         System.out.println("Essai de connexion à  " + ip + " sur le port " + port + "\n");
 
-        SocketChannel client = null;
+
+        SocketChannel[] listeClientServer = new SocketChannel[3] ;
+        SocketChannel clientServer1 = null;
+        listeClientServer[0] = clientServer1 ;
+        SocketChannel clientServer2 = null;
+        listeClientServer[1] = clientServer2 ;
+        SocketChannel clientServer3 = null;
+        listeClientServer[2] = clientServer3 ;
+
         ByteBuffer buffer = null;
 
         try {
-            client = SocketChannel.open(new InetSocketAddress(ip, port));
-            System.out.println(client.toString());
-            //System.err.println("le n° de la socket est : " + client);
+            for (int i = 0; i < 3 ; i++) {
+                listeClientServer[i] = SocketChannel.open(new InetSocketAddress(ip, port + i));
+            }
+            System.out.println(listeClientServer.toString());
             buffer = ByteBuffer.allocate(256);
         } catch (IOException e) {
             System.err.println("Connexion: hôte inconnu : " + ip);
@@ -47,10 +56,10 @@ public class PairsClient {
         }
 
         /* Session */
-        traiterLogin(client, buffer);
+        traiterLogin(listeClientServer, buffer);
     }
 
-    public static void traiterLogin(SocketChannel client, ByteBuffer buffer) {
+    public static void traiterLogin(SocketChannel[] clients, ByteBuffer buffer) {
         try {
             String reponseLogin;
             String entreeLogin;
@@ -58,24 +67,25 @@ public class PairsClient {
             System.out.println("LOGIN pseudo");
             Scanner scan = new Scanner(System.in);
             entreeLogin = scan.nextLine();
-
-            client.write(ByteBuffer.wrap(entreeLogin.getBytes()));
-            client.read(buffer);
+            for (int i = 0; i < 3 ; i++) {
+                clients[i].write(ByteBuffer.wrap(entreeLogin.getBytes()));
+            }
+            clients[2].read(buffer);
 
             reponseLogin = (buffer != null) ? new String(buffer.array()).trim() : "";
             buffer.clear();
             if (reponseLogin.equals("ERROR LOGIN aborting chatamu protocol")) {
                 System.out.println(reponseLogin);
-                client.close();
+                clients[2].close();
                 exit(2);
             }
             else if (reponseLogin.equals("ERROR LOGIN username")) {
                 System.out.println("Pseudo déja pris.");
-                traiterLogin(client, buffer);
+                traiterLogin(clients, buffer);
             } else {
                 System.out.println("Vous avez rejoin le server avec succès.");
-                Thread threadRead = new Thread(new ReadMessages(client));
-                Thread threadWrite = new Thread(new WriteMessages(client));
+                Thread threadRead = new Thread(new ReadMessages(clients[2]));
+                Thread threadWrite = new Thread(new WriteMessages(clients[2]));
                 threadRead.start();
                 threadWrite.start();
             }
@@ -115,8 +125,9 @@ class ReadMessages implements Runnable{
                 buffer = ByteBuffer.allocate(128);
             }
         } catch (IOException e) {
-            e.printStackTrace();
-            exit(0);
+            System.out.println("ouaiss");
+            //e.printStackTrace();
+            //exit(0);
         }
     }
 }
