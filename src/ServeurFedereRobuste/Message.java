@@ -1,4 +1,4 @@
-package CausalBroadcast;
+package ServeurFedereRobuste;
 
 import java.nio.channels.SocketChannel;
 import java.util.Vector;

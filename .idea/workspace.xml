@@ -3,8 +3,14 @@
   <component name="ChangeListManager">
     <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CausalBroadcast/PairsClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CausalBroadcast/PairsClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CausalBroadcast/PairsServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CausalBroadcast/PairsServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/launch.bash" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CausalBroadcast/Message.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CausalBroadcast/PairsClient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CausalBroadcast/PairsServer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ChatamuCentral.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/EchoClient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SalonCentral.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SlaveServeur.java" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -45,40 +51,78 @@
     </option>
   </component>
   <component name="RunManager" selected="Compound.PairServer">
-    <configuration name="0 Salon central" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="SalonCentral" />
-      <module name="Projet_Reseaux" />
-      <option name="PROGRAM_PARAMETERS" value="12345" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="0 Serveur central" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="ChatamuCentral" />
-      <module name="Projet_Reseaux" />
-      <option name="PROGRAM_PARAMETERS" value="12345" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="EchoClient 1" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="EchoClient" />
+    <configuration name="EchoClient 1 (FS v1)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="FederationServeurs.version1.EchoClient" />
       <module name="Projet_Reseaux" />
       <option name="PROGRAM_PARAMETERS" value="localhost 12345" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="EchoClient 2" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="EchoClient" />
+    <configuration name="EchoClient 1 (FS v2)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="FederationServeurs.version2.EchoClient" />
       <module name="Projet_Reseaux" />
       <option name="PROGRAM_PARAMETERS" value="localhost 12345" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="EchoClient 3" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="EchoClient" />
+    <configuration name="EchoClient 1 (SC)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="ServiceCentralise.EchoClient" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="localhost 12345" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="ServiceCentralise.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="EchoClient 2 (FS v1)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="FederationServeurs.version1.EchoClient" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="localhost 12345" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="EchoClient 2 (FS v2)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="FederationServeurs.version2.EchoClient" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="localhost 12345" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="EchoClient 2 (SC)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="ServiceCentralise.EchoClient" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="localhost 12345" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="EchoClient 3 (FS v1)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="FederationServeurs.version1.EchoClient" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="localhost 12345" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="EchoClient 3 (FS v2)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="FederationServeurs.version2.EchoClient" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="localhost 12345" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="EchoClient 3 (SC)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="ServiceCentralise.EchoClient" />
       <module name="Projet_Reseaux" />
       <option name="PROGRAM_PARAMETERS" value="localhost 12345" />
       <method v="2">
@@ -86,7 +130,7 @@
       </method>
     </configuration>
     <configuration name="PairServeur 2" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="CausalBroadcast.PairsServer" />
+      <option name="MAIN_CLASS_NAME" value="ServeurFedereRobuste.PairsServer" />
       <module name="Projet_Reseaux" />
       <option name="PROGRAM_PARAMETERS" value="localhost 12341 Pair2 3" />
       <method v="2">
@@ -94,7 +138,7 @@
       </method>
     </configuration>
     <configuration name="PairServeur 3" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="CausalBroadcast.PairsServer" />
+      <option name="MAIN_CLASS_NAME" value="ServeurFedereRobuste.PairsServer" />
       <module name="Projet_Reseaux" />
       <option name="PROGRAM_PARAMETERS" value="localhost 12342 Pair3 3" />
       <method v="2">
@@ -102,7 +146,7 @@
       </method>
     </configuration>
     <configuration name="PairServeur" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="CausalBroadcast.PairsServer" />
+      <option name="MAIN_CLASS_NAME" value="ServeurFedereRobuste.PairsServer" />
       <module name="Projet_Reseaux" />
       <option name="PROGRAM_PARAMETERS" value="localhost 12340 Pair1 3" />
       <method v="2">
@@ -110,7 +154,7 @@
       </method>
     </configuration>
     <configuration name="PairsClient 1" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="CausalBroadcast.PairsClient" />
+      <option name="MAIN_CLASS_NAME" value="ServeurFedereRobuste.PairsClient" />
       <module name="Projet_Reseaux" />
       <option name="PROGRAM_PARAMETERS" value="localhost 12340" />
       <method v="2">
@@ -118,7 +162,7 @@
       </method>
     </configuration>
     <configuration name="PairsClient 2" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="CausalBroadcast.PairsClient" />
+      <option name="MAIN_CLASS_NAME" value="ServeurFedereRobuste.PairsClient" />
       <module name="Projet_Reseaux" />
       <option name="PROGRAM_PARAMETERS" value="localhost 12340" />
       <method v="2">
@@ -126,74 +170,143 @@
       </method>
     </configuration>
     <configuration name="PairsClient 3" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="CausalBroadcast.PairsClient" />
+      <option name="MAIN_CLASS_NAME" value="ServeurFedereRobuste.PairsClient" />
       <module name="Projet_Reseaux" />
       <option name="PROGRAM_PARAMETERS" value="localhost 12340" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SlaveServeur 1" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="SlaveServeur" />
+    <configuration name="Salon central (SC)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="ServiceCentralise.SalonCentral" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="12345" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Serveur central (FS v1)" type="Application" factoryName="Application" singleton="false">
+      <option name="MAIN_CLASS_NAME" value="FederationServeurs.version1.ChatamuCentral" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="12345" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Serveur central (FS v2)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="FederationServeurs.version2.ChatamuCentral" />
+      <module name="Projet_Reseaux" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Serveur central (SC)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="ServiceCentralise.ChatamuCentral" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="12345" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="SlaveServeur 1 (FS v1)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="FederationServeurs.version1.SlaveServeur" />
       <module name="Projet_Reseaux" />
       <option name="PROGRAM_PARAMETERS" value="localhost 12346 Slave1" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SlaveServeur 2" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="SlaveServeur" />
+    <configuration name="SlaveServeur 1 (FS v2)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="FederationServeurs.version2.SlaveServeur" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="peer1" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="SlaveServeur 2 (FS v1)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="FederationServeurs.version1.SlaveServeur" />
       <module name="Projet_Reseaux" />
       <option name="PROGRAM_PARAMETERS" value="localhost 12347 Slave2" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SlaveServeur 3" type="Application" factoryName="Application">
-      <option name="MAIN_CLASS_NAME" value="SlaveServeur" />
+    <configuration name="SlaveServeur 2 (FS v2)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="FederationServeurs.version2.SlaveServeur" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="peer2" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="SlaveServeur 3 (FS v1)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="FederationServeurs.version1.SlaveServeur" />
       <module name="Projet_Reseaux" />
       <option name="PROGRAM_PARAMETERS" value="localhost 12348 Slave3" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Cluster" type="CompoundRunConfigurationType">
-      <toRun name="SlaveServeur 3" type="Application" />
-      <toRun name="0 Serveur central" type="Application" />
-      <toRun name="EchoClient 1" type="Application" />
-      <toRun name="EchoClient 3" type="Application" />
-      <toRun name="EchoClient 2" type="Application" />
-      <toRun name="SlaveServeur 2" type="Application" />
-      <toRun name="SlaveServeur 1" type="Application" />
+    <configuration name="SlaveServeur 3 (FS v2)" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="FederationServeurs.version2.SlaveServeur" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="peer3" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Fédération simple (v1)" type="CompoundRunConfigurationType">
+      <toRun name="Serveur central (FS v1)" type="Application" />
+      <toRun name="SlaveServeur 1 (FS v1)" type="Application" />
+      <toRun name="SlaveServeur 2 (FS v1)" type="Application" />
+      <toRun name="SlaveServeur 3 (FS v1)" type="Application" />
+      <toRun name="EchoClient 1 (FS v1)" type="Application" />
+      <toRun name="EchoClient 3 (FS v1)" type="Application" />
+      <toRun name="EchoClient 2 (FS v1)" type="Application" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Fédération simple (v2)" type="CompoundRunConfigurationType">
+      <toRun name="Serveur central (FS v2)" type="Application" />
+      <toRun name="SlaveServeur 1 (FS v2)" type="Application" />
+      <toRun name="SlaveServeur 2 (FS v2)" type="Application" />
+      <toRun name="SlaveServeur 3 (FS v2)" type="Application" />
+      <toRun name="EchoClient 1 (FS v2)" type="Application" />
+      <toRun name="EchoClient 2 (FS v2)" type="Application" />
+      <toRun name="EchoClient 3 (FS v2)" type="Application" />
       <method v="2" />
     </configuration>
     <configuration name="PairServer" type="CompoundRunConfigurationType">
-      <toRun name="PairServeur 3" type="Application" />
-      <toRun name="PairServeur 2" type="Application" />
       <toRun name="PairServeur" type="Application" />
-      <toRun name="PairsClient 3" type="Application" />
-      <toRun name="PairsClient 2" type="Application" />
+      <toRun name="PairServeur 2" type="Application" />
+      <toRun name="PairServeur 3" type="Application" />
       <toRun name="PairsClient 1" type="Application" />
+      <toRun name="PairsClient 2" type="Application" />
+      <toRun name="PairsClient 3" type="Application" />
       <method v="2" />
     </configuration>
     <configuration name="Salon central" type="CompoundRunConfigurationType">
-      <toRun name="EchoClient 2" type="Application" />
-      <toRun name="EchoClient 3" type="Application" />
-      <toRun name="EchoClient 1" type="Application" />
-      <toRun name="0 EchoServer" type="Application" />
+      <toRun name="Salon central (SC)" type="Application" />
+      <toRun name="EchoClient 1 (SC)" type="Application" />
+      <toRun name="EchoClient 2 (SC)" type="Application" />
+      <toRun name="EchoClient 3 (SC)" type="Application" />
       <method v="2" />
     </configuration>
     <configuration name="Serveur central" type="CompoundRunConfigurationType">
-      <toRun name="0 Serveur central" type="Application" />
-      <toRun name="EchoClient 2" type="Application" />
-      <toRun name="EchoClient 1" type="Application" />
-      <toRun name="EchoClient 3" type="Application" />
+      <toRun name="Serveur central (SC)" type="Application" />
+      <toRun name="EchoClient 1 (SC)" type="Application" />
+      <toRun name="EchoClient 2 (SC)" type="Application" />
+      <toRun name="EchoClient 3 (SC)" type="Application" />
       <method v="2" />
     </configuration>
     <configuration default="true" type="CompoundRunConfigurationType">
-      <toRun name="PairServeur" type="Application" />
-      <toRun name="PairServeur 3" type="Application" />
-      <toRun name="PairServeur 2" type="Application" />
+      <toRun name="Serveur central (FS v2)" type="Application" />
+      <toRun name="SlaveServeur 1 (FS v2)" type="Application" />
+      <toRun name="SlaveServeur 2 (FS v2)" type="Application" />
+      <toRun name="SlaveServeur 3 (FS v2)" type="Application" />
+      <toRun name="EchoClient 1 (FS v2)" type="Application" />
+      <toRun name="EchoClient 2 (FS v2)" type="Application" />
+      <toRun name="EchoClient 3 (FS v2)" type="Application" />
       <method v="2" />
     </configuration>
     <list>
@@ -202,19 +315,31 @@
       <item itemvalue="Application.PairsClient 3" />
       <item itemvalue="Application.PairServeur 3" />
       <item itemvalue="Application.PairServeur" />
-      <item itemvalue="Application.0 Salon central" />
-      <item itemvalue="Application.EchoClient 1" />
-      <item itemvalue="Application.EchoClient 2" />
-      <item itemvalue="Application.EchoClient 3" />
-      <item itemvalue="Application.0 Serveur central" />
-      <item itemvalue="Application.SlaveServeur 2" />
-      <item itemvalue="Application.SlaveServeur 1" />
+      <item itemvalue="Application.Salon central (SC)" />
+      <item itemvalue="Application.EchoClient 1 (FS v1)" />
+      <item itemvalue="Application.EchoClient 1 (FS v2)" />
+      <item itemvalue="Application.EchoClient 2 (FS v2)" />
+      <item itemvalue="Application.EchoClient 2 (FS v1)" />
+      <item itemvalue="Application.EchoClient 3 (FS v2)" />
+      <item itemvalue="Application.EchoClient 3 (FS v1)" />
+      <item itemvalue="Application.Serveur central (SC)" />
+      <item itemvalue="Application.SlaveServeur 2 (FS v1)" />
+      <item itemvalue="Application.SlaveServeur 1 (FS v1)" />
       <item itemvalue="Application.PairServeur 2" />
-      <item itemvalue="Application.SlaveServeur 3" />
-      <item itemvalue="Compound.Serveur central" />
-      <item itemvalue="Compound.Cluster" />
-      <item itemvalue="Compound.PairServer" />
+      <item itemvalue="Application.SlaveServeur 3 (FS v1)" />
+      <item itemvalue="Application.SlaveServeur 1 (FS v2)" />
+      <item itemvalue="Application.SlaveServeur 2 (FS v2)" />
+      <item itemvalue="Application.SlaveServeur 3 (FS v2)" />
+      <item itemvalue="Application.EchoClient 2 (SC)" />
+      <item itemvalue="Application.EchoClient 3 (SC)" />
+      <item itemvalue="Application.EchoClient 1 (SC)" />
+      <item itemvalue="Application.Serveur central (FS v1)" />
+      <item itemvalue="Application.Serveur central (FS v2)" />
       <item itemvalue="Compound.Salon central" />
+      <item itemvalue="Compound.Serveur central" />
+      <item itemvalue="Compound.Fédération simple (v1)" />
+      <item itemvalue="Compound.Fédération simple (v2)" />
+      <item itemvalue="Compound.PairServer" />
     </list>
   </component>
   <component name="SvnConfiguration">
@@ -253,9 +378,12 @@
       <workItem from="1586209487207" duration="10890000" />
       <workItem from="1586271875955" duration="847000" />
       <workItem from="1586337160121" duration="10106000" />
-      <workItem from="1586423931130" duration="7599000" />
-      <workItem from="1586513336920" duration="8889000" />
-      <workItem from="1586600117175" duration="8918000" />
+      <workItem from="1586423931130" duration="6647000" />
+      <workItem from="1586525080670" duration="1316000" />
+      <workItem from="1586599117957" duration="7027000" />
+      <workItem from="1586612441774" duration="315000" />
+      <workItem from="1586612925363" duration="1112000" />
+      <workItem from="1586680761953" duration="644000" />
     </task>
     <task id="LOCAL-00001" summary="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé">
       <created>1584557598849</created>
@@ -341,28 +469,7 @@
       <option name="project" value="LOCAL" />
       <updated>1586350569604</updated>
     </task>
-    <task id="LOCAL-00013" summary="avancement">
-      <created>1586441280323</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1586441280323</updated>
-    </task>
-    <task id="LOCAL-00014" summary="pairsServer">
-      <created>1586528915943</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1586528915943</updated>
-    </task>
-    <task id="LOCAL-00015" summary="1ere version pairsServeur">
-      <created>1586607967062</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1586607967062</updated>
-    </task>
-    <option name="localTasksCounter" value="16" />
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -396,10 +503,7 @@
     <MESSAGE value="?" />
     <MESSAGE value="avancement pairsServer" />
     <MESSAGE value="correction bugs" />
-    <MESSAGE value="avancement" />
-    <MESSAGE value="pairsServer" />
-    <MESSAGE value="1ere version pairsServeur" />
-    <option name="LAST_COMMIT_MESSAGE" value="1ere version pairsServeur" />
+    <option name="LAST_COMMIT_MESSAGE" value="correction bugs" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ProjetReseau$EchoClient.ic" NAME="EchoClient Coverage Results" MODIFIED="1584006174534" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />

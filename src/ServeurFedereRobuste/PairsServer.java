@@ -1,4 +1,4 @@
-package CausalBroadcast;
+package ServeurFedereRobuste;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -215,28 +215,28 @@ class PairReturn implements Runnable{
         serveursDisponnibles.add(nom) ;
     }
 
-/**
-    private void traiterServerConnect(String message, SocketChannel chan) throws IOException {
-        if(!verifierCoServeur(message)){
-            chan.write(ByteBuffer.wrap("ERROR SERVER".getBytes()));
-        }
-        else {
-            String name = message.split(" ")[1] ;
-            if (verifierServeur(name)) {
-                chan.write(ByteBuffer.wrap("ok".getBytes()));
-                String pseudo = clientPseudo.get(chan.socket().getPort()) ;
-                clientSocket.put(pseudo, chan) ;
-                listeSocketClients.add(chan) ;
-                stateClient.remove(chan) ;
-                stateClient.put(chan, STATE_MESSAGE) ;
-                SocketChannel serveur = serveursNames.get(name) ;
-                System.out.println(pseudo + " a rejoint le serveur " + name);
-            }
-            else {
-                chan.write(ByteBuffer.wrap("ERROR SERVER NAME".getBytes()));
-            }
-        }
-    }**/
+    /**
+     private void traiterServerConnect(String message, SocketChannel chan) throws IOException {
+     if(!verifierCoServeur(message)){
+     chan.write(ByteBuffer.wrap("ERROR SERVER".getBytes()));
+     }
+     else {
+     String name = message.split(" ")[1] ;
+     if (verifierServeur(name)) {
+     chan.write(ByteBuffer.wrap("ok".getBytes()));
+     String pseudo = clientPseudo.get(chan.socket().getPort()) ;
+     clientSocket.put(pseudo, chan) ;
+     listeSocketClients.add(chan) ;
+     stateClient.remove(chan) ;
+     stateClient.put(chan, STATE_MESSAGE) ;
+     SocketChannel serveur = serveursNames.get(name) ;
+     System.out.println(pseudo + " a rejoint le serveur " + name);
+     }
+     else {
+     chan.write(ByteBuffer.wrap("ERROR SERVER NAME".getBytes()));
+     }
+     }
+     }**/
 
     private static boolean verifierCoServeur(String entree){
         return (entree.split(" ")[0].equals("SERVERCONNECT")) && (entree.split(" ").length == 2);
@@ -306,13 +306,13 @@ class PairReturn implements Runnable{
     }
 
     private void co_delivery(String message) throws IOException {
-            System.out.println("Je traite Co_delivery");
-            String pseudo = message.split(" ")[0] ;
-            System.out.println(message);
-            for (String c : clients) {
-                SocketChannel chan = clientSocket.get(c) ;
-                chan.write(ByteBuffer.wrap(message.getBytes()));
-            }
+        System.out.println("Je traite Co_delivery");
+        String pseudo = message.split(" ")[0] ;
+        System.out.println(message);
+        for (String c : clients) {
+            SocketChannel chan = clientSocket.get(c) ;
+            chan.write(ByteBuffer.wrap(message.getBytes()));
+        }
     }
 
     private void traiterMessageClient(String message, SocketChannel chan) throws IOException {
@@ -342,21 +342,18 @@ class PairReturn implements Runnable{
         pour chaque autre serveur, on envoie CO_BR(message, vector[1..nbServeur])
         vector[i] = vector[i] + 1
         appelle co_delivery(message) pour le traiter sur ce serveur
-
-
         quand serveur reçoit CO_BR(message, vector[1..nbServeur])
         on attend que tous les indices du vecteur sont remplis
         vector[i] = vector[i] + 1
-
          */
 
 
         /**
-        String envoi = message.broadcast.toString() + " " + message.message ;
-        for (SocketChannel socketChannel : listSocketServeurs) {
-            client = SocketChannel.open(new InetSocketAddress("127.0.0.1", socketChannelServerPort.get(socketChannel)));
-            client.write(ByteBuffer.wrap(envoi.getBytes()));
-        }
+         String envoi = message.broadcast.toString() + " " + message.message ;
+         for (SocketChannel socketChannel : listSocketServeurs) {
+         client = SocketChannel.open(new InetSocketAddress("127.0.0.1", socketChannelServerPort.get(socketChannel)));
+         client.write(ByteBuffer.wrap(envoi.getBytes()));
+         }
          **/
         Integer port = 12339 ;
         Integer indice_socketCoServeur = 0 ;

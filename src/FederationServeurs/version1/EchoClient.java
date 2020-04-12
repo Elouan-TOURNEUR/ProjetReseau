@@ -1,3 +1,5 @@
+package FederationServeurs.version1;
+
 import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
@@ -17,7 +19,7 @@ public class EchoClient {
         /* Traitement des arguments */
         if (args.length != 2) {
             /* erreur de syntaxe */
-            System.out.println("Usage: java EchoClient @server @port");
+            System.out.println("Usage: java EchoClient ipServer port");
             exit(1);
         }
         ip = args[0];

@@ -1,5 +1,6 @@
+package FederationServeurs.version1;
+
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -13,8 +14,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class SlaveServeur {
-
-
 
     private static String name = null ;
 
@@ -134,7 +133,6 @@ public class SlaveServeur {
             socketChannelFileAttente.put(chan, fileAttenteClient) ;
             listeFileAttente.add(fileAttenteClient) ;
             listeSocket.add(chan) ;
-
              */
 
     }
@@ -194,8 +192,6 @@ public class SlaveServeur {
             */
         }
     }
-    //chan.write(ByteBuffer.wrap("OK".getBytes()));
-
 
 
     private static boolean verifierMessage(String entree){

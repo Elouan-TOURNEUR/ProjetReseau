@@ -1,11 +1,11 @@
 #!/bin/bash
 
 
-fichier="../../../src/pairs.cfg"
+fichier="../../../../../src/pairs.cfg"
 oldIFS=$IFS
 IFS=$'\r\n' # séparateur de champs (\n ou \r\n)
 
-cd ./out/production/Projet_Reseaux/
+cd ../../../out/production/Projet_Reseaux/FederationServeurs/version1
 master="ChatamuCentral"
 peer="SlaveServeur"
 counter=1
