@@ -1,5 +1,6 @@
 package ServeurFedereRobuste;
 
+import java.beans.EventHandler;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -23,6 +24,7 @@ public class PairsServer {
     public static Integer port = null;
     private static String ip = "127.0.0.1";
     public static Integer nbPairs = null ;
+    public static Integer numero = null ;
 
     public static void main(String[] args) throws IOException {
         int argc = args.length;
@@ -32,6 +34,7 @@ public class PairsServer {
             try {
                 ip = args[0];
                 port = Integer.parseInt(args[1]);
+                numero = port % 12340 ;
                 name = args[2];
                 nbPairs = Integer.parseInt(args[3]) ;
             } catch (Exception e) {
@@ -154,7 +157,7 @@ class PairReturn implements Runnable{
 
             initialiserCo() ;
             while (true) {
-                Thread.sleep(1000);
+                Thread.sleep(100);
                 if(pair.isEmpty())
                     continue;
                 SocketChannel chan = (SocketChannel) pair.poll();
@@ -192,7 +195,6 @@ class PairReturn implements Runnable{
             serverOrder[i] = port ;
             broadcast.set(i, 0) ;
             if (port.equals(PairsServer.port)){
-                System.out.println("c'est moi");
                 continue;
             }
             System.out.println("j'envoi un message chez " + port);
@@ -205,40 +207,11 @@ class PairReturn implements Runnable{
     }
 
     private static void traiterInitialiserCo(SocketChannel chan, String message) {
-        System.out.println(message);
         String nom = recupererContenuMessage(message) ;
         Integer port = chan.socket().getLocalPort() ;
-        System.out.println(port);
         serveursNames.put(nom, chan) ;
         listSocketServeurs.add(chan) ;
         serveursDisponnibles.add(nom) ;
-    }
-
-    /**
-     private void traiterServerConnect(String message, SocketChannel chan) throws IOException {
-     if(!verifierCoServeur(message)){
-     chan.write(ByteBuffer.wrap("ERROR SERVER".getBytes()));
-     }
-     else {
-     String name = message.split(" ")[1] ;
-     if (verifierServeur(name)) {
-     chan.write(ByteBuffer.wrap("ok".getBytes()));
-     String pseudo = clientPseudo.get(chan.socket().getPort()) ;
-     clientSocket.put(pseudo, chan) ;
-     listeSocketClients.add(chan) ;
-     stateClient.remove(chan) ;
-     stateClient.put(chan, STATE_MESSAGE) ;
-     SocketChannel serveur = serveursNames.get(name) ;
-     System.out.println(pseudo + " a rejoint le serveur " + name);
-     }
-     else {
-     chan.write(ByteBuffer.wrap("ERROR SERVER NAME".getBytes()));
-     }
-     }
-     }**/
-
-    private static boolean verifierCoServeur(String entree){
-        return (entree.split(" ")[0].equals("SERVERCONNECT")) && (entree.split(" ").length == 2);
     }
 
     private static boolean verifierServeur(String name) {
@@ -250,9 +223,7 @@ class PairReturn implements Runnable{
     }
 
     private boolean messageServeur(SocketChannel chan) {
-        System.out.println(chan.toString());
         for (SocketChannel socketChannel : listSocketServeurs){
-            System.out.println(socketChannel.toString());
             if (chan.equals(socketChannel))
                 return true ;
         }
@@ -261,10 +232,10 @@ class PairReturn implements Runnable{
 
     private void traiterMessageServeur(SocketChannel chan, String message) throws IOException, InterruptedException {
         System.out.println("Je traite messageServer");
-        String stringVector = message.split(" ")[0] + message.split(" ")[1] + message.split(" ")[2] ;
-        String[] entrees = message.split(" ", 4);
-        String messageString = entrees[3];
-        out.println(messageString);;
+        int numero = Integer.parseInt(message.split(" ")[0]) ;
+        String stringVector = message.split(" ")[1] + message.split(" ")[2] + message.split(" ")[3] ;
+        String[] entrees = message.split(" ", 5);
+        String messageString = entrees[4];
         System.out.println(stringVector);
         Vector<Integer> vector = new Vector<>(PairsServer.nbPairs) ;
         vector.setSize(PairsServer.nbPairs);
@@ -272,31 +243,28 @@ class PairReturn implements Runnable{
         String str ;
         for (int i = 0; i < PairsServer.nbPairs ; i++) {
             str = Character.toString(stringVector.charAt(indice)) ;
-            //System.out.println(str);
             indice = indice + 2 ;
             vector.set(i, Integer.parseInt(str)) ;
-            //System.out.println(Integer.parseInt(stringVector.split("")[i]));
-            //vector.set(i, Integer.parseInt(stringVector.split("")[i])) ;
         }
         Message messageObjet = new Message(messageString, vector) ;
-        receive_co_broadcast(messageObjet, chan);
+        receive_co_broadcast(messageObjet, chan, numero);
     }
 
 
-    private void receive_co_broadcast(Message message, SocketChannel channel) throws IOException, InterruptedException {
+    private void receive_co_broadcast(Message message, SocketChannel channel, int numero) throws IOException, InterruptedException {
         System.out.println("Je traite receive co_broadcast");
         if (!traitementPossible(message)){
-            String envoi = message.broadcast.toString() + " " + message.message ;
+            String envoi = PairsServer.numero.toString() + " " + message.broadcast.toString() + " " + message.message ;
             pair.add(channel) ;
             pair.add(envoi) ;
             System.out.println("Pas le moment.");
         }
-        System.out.println(message.message);
-        co_delivery(message.message);
-        int indice = trouverIndice(channel) ;
-        for (int i = 0 ; i < listSocketServeurs.size() ; i++) {
-            broadcast.set(i, Math.max(broadcast.get(i), message.broadcast.get(i))) ;
+        else {
+            co_delivery(message.message, numero);
         }
+        /**for (int i = 0 ; i < listSocketServeurs.size() ; i++) {
+            broadcast.set(i, Math.max(broadcast.get(i), message.broadcast.get(i))) ;
+        }**/
     }
 
     private boolean traitementPossible(Message message) {
@@ -307,12 +275,13 @@ class PairReturn implements Runnable{
         return true ;
     }
     
-    private void co_delivery(String message) throws InterruptedException {
+    private void co_delivery(String message, int numero) throws InterruptedException {
         System.out.println("Je traite Co_delivery");
-        //String pseudo = message.split(" ")[0] ;
+        broadcast.set(numero, broadcast.get(numero)+1) ;
+
         System.out.println(message);
         for (String c : clients) {
-            Thread.sleep(500);
+            Thread.sleep(100);
             SocketChannel chan = clientSocket.get(c);
             try {
                 if (chan.isConnected()) {
@@ -356,17 +325,9 @@ class PairReturn implements Runnable{
         vector[i] = vector[i] + 1
          */
 
-
-        /**
-         String envoi = message.broadcast.toString() + " " + message.message ;
-         for (SocketChannel socketChannel : listSocketServeurs) {
-         client = SocketChannel.open(new InetSocketAddress("127.0.0.1", socketChannelServerPort.get(socketChannel)));
-         client.write(ByteBuffer.wrap(envoi.getBytes()));
-         }
-         **/
         Integer port = 12339 ;
         Integer indice_socketCoServeur = 0 ;
-        String envoi = message.broadcast.toString() + " " + message.message ;
+        String envoi = PairsServer.numero.toString() + " " + message.broadcast.toString() + " " + message.message ;
         for (int i = 0; i < PairsServer.nbPairs; i++) {
             ++port ;
             if (port.equals(PairsServer.port)){
@@ -387,26 +348,24 @@ class PairReturn implements Runnable{
         for (int i = 0 ; i < listSocketServeurs.size() ; i++) {
             broadcast.set(i, Math.max(broadcast.get(i), message.broadcast.get(i))) ;
         }
-        co_delivery(message.message) ;
+        co_delivery(message.message, PairsServer.numero) ;
     }
 
-
-    private int trouverIndice(SocketChannel channel) {
-        for (int i = 0; i < serverOrder.length ; i++) {
-            if (serverOrder[i].equals(channel))
-                return i ;
-        }
-        return 2000 ;
-    }
 
 
     private static void traiterLogin(String entree, SocketChannel chan) throws IOException {
         System.out.println("Je traite login");
         if(!verifierConnexion(entree)){
-            chan.write(ByteBuffer.wrap("ERROR LOGIN aborting chatamu protocol".getBytes()));
+            if (chan.isConnected())
+                chan.write(ByteBuffer.wrap("ERROR LOGIN aborting chatamu protocol".getBytes()));
+            else
+                return;
         }
         else if(!verifierPseudo(recupererContenuLogin(entree))) {
-            chan.write(ByteBuffer.wrap("ERROR LOGIN username".getBytes()));
+            if(chan.isConnected())
+                chan.write(ByteBuffer.wrap("ERROR LOGIN username".getBytes()));
+            else
+                return;
         }
         else {
             String pseudo =  recupererContenuLogin(entree) ;

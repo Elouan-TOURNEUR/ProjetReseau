@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsClient.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsServer.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -378,7 +377,7 @@
       <workItem from="1586612441774" duration="315000" />
       <workItem from="1586612925363" duration="1112000" />
       <workItem from="1586680761953" duration="644000" />
-      <workItem from="1586766501410" duration="6950000" />
+      <workItem from="1586766501410" duration="11596000" />
     </task>
     <task id="LOCAL-00001" summary="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé">
       <created>1584557598849</created>
@@ -471,7 +470,14 @@
       <option name="project" value="LOCAL" />
       <updated>1586702861022</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="fédération robuste ok">
+      <created>1586778853567</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1586778853567</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -506,7 +512,8 @@
     <MESSAGE value="avancement pairsServer" />
     <MESSAGE value="correction bugs" />
     <MESSAGE value="avancement" />
-    <option name="LAST_COMMIT_MESSAGE" value="avancement" />
+    <MESSAGE value="fédération robuste ok" />
+    <option name="LAST_COMMIT_MESSAGE" value="fédération robuste ok" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ProjetReseau$EchoClient.ic" NAME="EchoClient Coverage Results" MODIFIED="1584006174534" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
