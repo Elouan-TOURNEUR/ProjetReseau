@@ -7,8 +7,7 @@ import java.nio.channels.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static java.lang.System.exit;
-import static java.lang.System.in;
+import static java.lang.System.*;
 
 /*
  -  attribuer une horloge vectorielle à chaque message diffusé et à utiliser les informations de causalité dans l'horloge vectorielle
@@ -263,6 +262,9 @@ class PairReturn implements Runnable{
     private void traiterMessageServeur(SocketChannel chan, String message) throws IOException, InterruptedException {
         System.out.println("Je traite messageServer");
         String stringVector = message.split(" ")[0] + message.split(" ")[1] + message.split(" ")[2] ;
+        String[] entrees = message.split(" ", 4);
+        String messageString = entrees[3];
+        out.println(messageString);;
         System.out.println(stringVector);
         Vector<Integer> vector = new Vector<>(PairsServer.nbPairs) ;
         vector.setSize(PairsServer.nbPairs);
@@ -276,7 +278,7 @@ class PairReturn implements Runnable{
             //System.out.println(Integer.parseInt(stringVector.split("")[i]));
             //vector.set(i, Integer.parseInt(stringVector.split("")[i])) ;
         }
-        Message messageObjet = new Message(message, vector) ;
+        Message messageObjet = new Message(messageString, vector) ;
         receive_co_broadcast(messageObjet, chan);
     }
 
@@ -289,7 +291,7 @@ class PairReturn implements Runnable{
             pair.add(envoi) ;
             System.out.println("Pas le moment.");
         }
-
+        System.out.println(message.message);
         co_delivery(message.message);
         int indice = trouverIndice(channel) ;
         for (int i = 0 ; i < listSocketServeurs.size() ; i++) {
@@ -305,14 +307,20 @@ class PairReturn implements Runnable{
         return true ;
     }
     
-    private void co_delivery(String message) throws IOException, InterruptedException {
+    private void co_delivery(String message) throws InterruptedException {
         System.out.println("Je traite Co_delivery");
-        String pseudo = message.split(" ")[0] ;
+        //String pseudo = message.split(" ")[0] ;
         System.out.println(message);
         for (String c : clients) {
             Thread.sleep(500);
-            SocketChannel chan = clientSocket.get(c) ;
-            chan.write(ByteBuffer.wrap(message.getBytes()));
+            SocketChannel chan = clientSocket.get(c);
+            try {
+                if (chan.isConnected()) {
+                    chan.write(ByteBuffer.wrap(message.getBytes()));
+                }
+            } catch (IOException e) {
+                continue;
+            }
         }
     }
 

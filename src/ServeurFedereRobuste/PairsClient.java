@@ -1,13 +1,16 @@
 package ServeurFedereRobuste;
 
+import java.awt.image.WritableRenderedImage;
 import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.sql.SQLOutput;
+import java.util.Random;
 import java.util.Scanner;
 
 import static java.lang.System.exit;
+import static java.lang.System.setOut;
 
 public class PairsClient {
 
@@ -72,9 +75,11 @@ public class PairsClient {
             Scanner scan = new Scanner(System.in);
             entreeLogin = scan.nextLine();
             for (int i = 0; i < 3 ; i++) {
-                clients[i].write(ByteBuffer.wrap(entreeLogin.getBytes()));
+                if (clients[i].isConnected())
+                    clients[i].write(ByteBuffer.wrap(entreeLogin.getBytes()));
             }
-            clients[2].read(buffer);
+            SocketChannel client = chercherUnAutreServeur() ;
+            client.read(buffer);
 
             reponseLogin = (buffer != null) ? new String(buffer.array()).trim() : "";
             buffer.clear();
@@ -88,8 +93,8 @@ public class PairsClient {
                 traiterLogin(clients, buffer);
             } else {
                 System.out.println("Vous avez rejoin le server avec succès.");
-                readMessages = new ReadMessages(clients[2]);
-                writeMessages = new WriteMessages(clients[2]);
+                readMessages = new ReadMessages(client);
+                writeMessages = new WriteMessages(client);
                 Thread threadRead = new Thread(readMessages);
                 Thread threadWrite = new Thread(writeMessages);
                 threadRead.start();
@@ -105,14 +110,14 @@ public class PairsClient {
 
 
     public static SocketChannel chercherUnAutreServeur() {
-        /**for(SocketChannel chan : listeClientServer){
-            if(chan.isConnected())
-                return chan;
+        Random rand = new Random() ;
+        int nbAléa = rand.nextInt(3) ;
+        if (listeClientServer[nbAléa].isConnected()){
+            System.out.println(nbAléa);
+            return listeClientServer[nbAléa] ;
         }
-        return null;
-         **/
-        return listeClientServer[1] ;
-
+        else
+            return chercherUnAutreServeur() ;
     }
 }
 
@@ -130,13 +135,6 @@ class ReadMessages implements Runnable{
 
     @Override
     public void run() {
-        while (!WriteMessages.estPret){
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
         ByteBuffer buffer = ByteBuffer.allocate(128);
         String reponseMessage;
         try {
@@ -145,19 +143,22 @@ class ReadMessages implements Runnable{
                 buffer.flip();
 
                 reponseMessage = (buffer != null) ? new String(buffer.array()).trim() : "";
-                System.out.println(reponseMessage);
-
+                if(WriteMessages.estPret)
+                    System.out.println(reponseMessage);
+                else{
+                    WriteMessages.estPret = true ;
+                }
                 buffer.clear();
                 buffer = ByteBuffer.allocate(128);
             }
         } catch (IOException e) {
-            this.client = PairsClient.chercherUnAutreServeur();
-            PairsClient.writeMessages.setClient(this.client);
-            ReadMessages readMessages = new ReadMessages(PairsClient.listeClientServer[1]);
+            client = PairsClient.chercherUnAutreServeur();
+            PairsClient.writeMessages.setClient(client);
+            ReadMessages readMessages = new ReadMessages(client);
             Thread threadRead = new Thread(readMessages);
             WriteMessages.estPret = false ;
             try {
-                Thread.sleep(3000);
+                Thread.sleep(100);
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
@@ -185,14 +186,13 @@ class WriteMessages implements Runnable{
     public void run() {
         Scanner scan = new Scanner(System.in);
         ByteBuffer buffer = ByteBuffer.allocate(128);
-
+        estPret = true ;
         String entreeMessage;
 
         try {
             while (true) {
                 System.out.println("MESSAGE message");
                 entreeMessage = scan.nextLine();
-                estPret = true ;
 
                 if(entreeMessage.equals("exit")){
                     System.out.println("c'est la fin j'envoie un dernier message au serveur.");
