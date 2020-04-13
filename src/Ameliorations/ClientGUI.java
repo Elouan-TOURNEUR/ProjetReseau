@@ -7,7 +7,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.file.Files;
 import java.util.List;
-
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -21,18 +20,51 @@ import javafx.scene.control.*;
 import static java.lang.System.exit;
 
 public class ClientGUI extends Application {
+
     private String info;
     private Stage stage;
+    public static volatile SocketChannel client;
+    private static ByteBuffer buffer;
 
 
     public static void main(String[] args) {
+        String ip;
+        int port;
+
+        if (args.length != 2) {
+            /* erreur de syntaxe */
+            System.out.println("Usage: java ClientGUI ipServer port");
+            exit(1);
+        }
+        ip = args[0];
+        port = Integer.parseInt(args[1]);
+
+        if (port > 65535) {
+            System.err.println("Port hors limite");
+            exit(3);
+        }
+
+
+        /* Connexion */
+        System.out.println("Essai de connexion à  " + ip + " sur le port " + port + "\n");
+
+        try {
+            ClientGUI.client = SocketChannel.open(new InetSocketAddress(ip, port));
+            ClientGUI.buffer = ByteBuffer.allocate(128);
+            System.out.println(ClientGUI.client.toString());
+            //System.err.println("le n° de la socket est : " + client);
+        } catch (IOException e) {
+            System.err.println("Connexion: hôte inconnu : " + ip);
+            e.printStackTrace();
+        }
+
+
         launch(args);
     }
 
 
     @Override
-    public void start(Stage stage) throws Exception {
-        System.out.println(initConnection());
+    public void start(Stage stage) {
         GridPane view = this.handleLogin();
         Scene scene = new Scene(view);
 
@@ -49,7 +81,7 @@ public class ClientGUI extends Application {
     }
 
 
-    private GridPane handleServ() throws IOException {
+    /*private GridPane handleServ() throws IOException {
         this.info = "Choisissez un serveur :";
         GridPane view = new GridPane();
         view.add(new Text(this.info), 1, 0, 1, 1);
@@ -70,7 +102,7 @@ public class ClientGUI extends Application {
         }
 
         return view;
-    }
+    }*/
 
     private GridPane handleLogin(){
         GridPane view = new GridPane();
@@ -82,6 +114,7 @@ public class ClientGUI extends Application {
         view.setVgap(30);
 
         TextField loginField = new TextField();
+        loginField.setOnAction(actionEvent -> login(loginField.getText()));
         view.add(loginField,1,1,1,1);
 
         Button button = new Button("Valider");
@@ -91,7 +124,7 @@ public class ClientGUI extends Application {
         return view;
     }
 
-    private GridPane handleChat(){
+    private GridPane handleMainPane(){
         GridPane view = new GridPane();
         view.add(new Text(this.info), 1,0,1,1);
         view.setMinSize(400, 400);
@@ -113,14 +146,14 @@ public class ClientGUI extends Application {
             try{
                 String entreeMessage = messageCl.getText();
                 if(entreeMessage.equals("exit")){
-                    client.write(ByteBuffer.wrap(entreeMessage.getBytes()));
-                    client.close();
+                    ClientGUI.client.write(ByteBuffer.wrap(entreeMessage.getBytes()));
+                    ClientGUI.client.close();
                     System.err.println("Fin de la session.");
                     exit(0);
                 }
 
                 entreeMessage = "MESSAGE "+entreeMessage;
-                client.write(ByteBuffer.wrap(entreeMessage.getBytes()));
+                ClientGUI.client.write(ByteBuffer.wrap(entreeMessage.getBytes()));
                 buffer.flip();
 
                 messageCl.setText("");
@@ -131,7 +164,7 @@ public class ClientGUI extends Application {
             }
         });
 
-        Thread threadRead = new Thread(new ReadGUIMessages(client, messages));
+        Thread threadRead = new Thread(new ReadGUIMessages(messages));
         threadRead.start();
 
 
@@ -139,62 +172,7 @@ public class ClientGUI extends Application {
     }
 
 
-
-
-
-
-
-
-
-
-
-    private ByteBuffer buffer;
-    private SocketChannel client;
-
-
-
-    public String initConnection() throws IOException {
-        String response;
-        String ip = null;
-        int port = 0;
-
-        /* Connexion*/
-        //System.out.println("Essai de connexion à  " + ip + " sur le port " + port + "\n");
-        this.buffer = null;
-
-
-        List<String> lConf = Files.readAllLines(new File("./src/pairs.cfg").toPath());
-
-        for(String conf : lConf){
-            String[] confSplit = conf.split(" = ");
-            if(confSplit[0].equals("master")){
-                String[] split = confSplit[1].split(" ");
-                ip = split[0];
-                port = Integer.parseInt(split[1]);
-                break;
-            }
-        }
-
-        if (port > 65535) {
-            return "Port hors limite";
-        }
-
-
-        try {
-            client = SocketChannel.open(new InetSocketAddress(ip, port));
-            response = client.toString();
-            //System.err.println("le n° de la socket est : " + client);
-            this.buffer = ByteBuffer.allocate(256);
-        } catch (IOException e) {
-            response = "Connexion: hôte inconnu : " + ip;
-            e.printStackTrace();
-        }
-
-        return response;
-    }
-
-
-    private String connect(String servName) {
+    /*private String connect(String servName) {
         ByteBuffer buffer = ByteBuffer.allocate(128);
         String response = null;
         try {
@@ -213,11 +191,7 @@ public class ClientGUI extends Application {
             }
             else {
                 response = "Vous avez rejoint le server avec succès.";
-                this.changeView(this.handleChat());
-                /*Thread threadRead = new Thread(new ReadMessages(client));
-                Thread threadWrite = new Thread(new WriteMessages(client));
-                threadRead.start();
-                threadWrite.start();*/
+                this.changeView(this.handleMainPane());
             }
 
         } catch (IOException e) {
@@ -226,7 +200,7 @@ public class ClientGUI extends Application {
         }
 
         return response;
-    }
+    }*/
 
 
     public String login(String pseudo) {
@@ -236,9 +210,9 @@ public class ClientGUI extends Application {
             String entreeLogin;
 
             entreeLogin = "LOGIN " + pseudo;
-            client.write(ByteBuffer.wrap(entreeLogin.getBytes()));
-            client.read(this.buffer);
-            System.out.println(this.buffer);
+            ClientGUI.client.write(ByteBuffer.wrap(entreeLogin.getBytes()));
+            ClientGUI.client.read(buffer);
+            System.out.println(buffer);
 
             response = (buffer != null) ? new String(buffer.array()).trim() : "";
             buffer.clear();
@@ -249,7 +223,7 @@ public class ClientGUI extends Application {
             } else if (response.equals("ERROR LOGIN username")) {
                 response = "Pseudo déja pris.";
             } else {
-                this.changeView(this.handleServ());
+                this.changeView(this.handleMainPane());
             }
 
         } catch (IOException e) {
@@ -265,11 +239,9 @@ public class ClientGUI extends Application {
 
 class ReadGUIMessages implements Runnable{
 
-    private SocketChannel client;
     private TextInputControl view;
 
-    public ReadGUIMessages(SocketChannel client, TextArea view){
-        this.client = client;
+    public ReadGUIMessages(TextArea view){
         this.view = view;
     }
 
@@ -280,12 +252,30 @@ class ReadGUIMessages implements Runnable{
 
         try {
             while (true) {
-                client.read(buffer);
+                ClientGUI.client.read(buffer);
                 buffer.flip();
 
                 reponseMessage = (buffer != null) ? new String(buffer.array()).trim() : "";
 
-                view.setText(view.getText()+"\n"+reponseMessage);
+                if(reponseMessage.split(" ")[0].equals("CONNECT")){
+                    int localPort = ClientGUI.client.socket().getLocalPort();
+                    ClientGUI.client.close();
+
+                    String address = reponseMessage.split(" ")[1];
+                    int port = Integer.parseInt(reponseMessage.split(" ")[2]);
+
+                    ClientGUI.client = SocketChannel.open();
+                    ClientGUI.client.bind(new InetSocketAddress(localPort));
+                    // TODO problème de connexion de temps en temps
+                    ClientGUI.client.connect(new InetSocketAddress(address, port));
+
+                    System.out.println("Vous avez rejoint le server avec succès.");
+                } else if(reponseMessage.split(" ")[0].equals("ERROR")){
+                    // TODO traduire et afficher les erreurs
+                    System.err.println(reponseMessage);
+                } else if(!reponseMessage.split(" ")[0].equals("OK")){
+                    view.setText(view.getText()+"\n"+reponseMessage);
+                }
                 //System.out.println(reponseMessage);
 
                 buffer.clear();

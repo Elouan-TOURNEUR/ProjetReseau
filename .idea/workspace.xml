@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ameliorations/ClientGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ameliorations/ClientGUI.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsServer.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -43,7 +44,23 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Compound.PairServer">
+  <component name="RunManager" selected="Compound.Améliorations GUI">
+    <configuration name="ClientGUI 1" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="Ameliorations.ClientGUI" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="localhost 12340" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ClientGUI 2" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="Ameliorations.ClientGUI" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="localhost 12341" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="EchoClient 1 (FS v1)" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="FederationServeurs.version1.EchoClient" />
       <module name="Projet_Reseaux" />
@@ -249,6 +266,14 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Améliorations GUI" type="CompoundRunConfigurationType">
+      <toRun name="PairServeur" type="Application" />
+      <toRun name="PairServeur 2" type="Application" />
+      <toRun name="PairServeur 3" type="Application" />
+      <toRun name="ClientGUI 1" type="Application" />
+      <toRun name="ClientGUI 2" type="Application" />
+      <method v="2" />
+    </configuration>
     <configuration name="Fédération simple (v1)" type="CompoundRunConfigurationType">
       <toRun name="Serveur central (FS v1)" type="Application" />
       <toRun name="SlaveServeur 1 (FS v1)" type="Application" />
@@ -293,16 +318,16 @@
       <method v="2" />
     </configuration>
     <configuration default="true" type="CompoundRunConfigurationType">
-      <toRun name="Serveur central (FS v2)" type="Application" />
-      <toRun name="SlaveServeur 1 (FS v2)" type="Application" />
-      <toRun name="SlaveServeur 2 (FS v2)" type="Application" />
-      <toRun name="SlaveServeur 3 (FS v2)" type="Application" />
-      <toRun name="EchoClient 1 (FS v2)" type="Application" />
-      <toRun name="EchoClient 2 (FS v2)" type="Application" />
-      <toRun name="EchoClient 3 (FS v2)" type="Application" />
+      <toRun name="PairServeur 2" type="Application" />
+      <toRun name="ClientGUI 2" type="Application" />
+      <toRun name="ClientGUI 1" type="Application" />
+      <toRun name="PairServeur" type="Application" />
+      <toRun name="PairServeur 3" type="Application" />
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Application.ClientGUI 1" />
+      <item itemvalue="Application.ClientGUI 2" />
       <item itemvalue="Application.PairsClient 1" />
       <item itemvalue="Application.PairsClient 2" />
       <item itemvalue="Application.PairsClient 3" />
@@ -333,6 +358,7 @@
       <item itemvalue="Compound.Fédération simple (v1)" />
       <item itemvalue="Compound.Fédération simple (v2)" />
       <item itemvalue="Compound.PairServer" />
+      <item itemvalue="Compound.Améliorations GUI" />
     </list>
   </component>
   <component name="SvnConfiguration">

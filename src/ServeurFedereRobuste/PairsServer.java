@@ -304,7 +304,7 @@ class PairReturn implements Runnable{
         }
         return true ;
     }
-    
+
     private void co_delivery(String message) throws IOException {
         System.out.println("Je traite Co_delivery");
         String pseudo = message.split(" ")[0] ;
