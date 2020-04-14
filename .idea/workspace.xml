@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsClient.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsServer.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -44,6 +45,19 @@
     </option>
   </component>
   <component name="RunManager" selected="Compound.PairServer">
+    <configuration name="ClientGUI" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="Ameliorations.ClientGUI" />
+      <module name="Projet_Reseaux" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="Ameliorations.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="EchoClient 1 (FS v1)" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="FederationServeurs.version1.EchoClient" />
       <module name="Projet_Reseaux" />
@@ -328,12 +342,18 @@
       <item itemvalue="Application.EchoClient 1 (SC)" />
       <item itemvalue="Application.Serveur central (FS v1)" />
       <item itemvalue="Application.Serveur central (FS v2)" />
+      <item itemvalue="Application.ClientGUI" />
       <item itemvalue="Compound.Salon central" />
       <item itemvalue="Compound.Serveur central" />
       <item itemvalue="Compound.Fédération simple (v1)" />
       <item itemvalue="Compound.Fédération simple (v2)" />
       <item itemvalue="Compound.PairServer" />
     </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.ClientGUI" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -377,7 +397,9 @@
       <workItem from="1586612441774" duration="315000" />
       <workItem from="1586612925363" duration="1112000" />
       <workItem from="1586680761953" duration="644000" />
-      <workItem from="1586766501410" duration="11596000" />
+      <workItem from="1586766501410" duration="15909000" />
+      <workItem from="1586808473401" duration="1851000" />
+      <workItem from="1586854770438" duration="13555000" />
     </task>
     <task id="LOCAL-00001" summary="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé">
       <created>1584557598849</created>
@@ -477,7 +499,14 @@
       <option name="project" value="LOCAL" />
       <updated>1586778853567</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="fédération robuste ok+">
+      <created>1586784104568</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1586784104568</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -513,7 +542,8 @@
     <MESSAGE value="correction bugs" />
     <MESSAGE value="avancement" />
     <MESSAGE value="fédération robuste ok" />
-    <option name="LAST_COMMIT_MESSAGE" value="fédération robuste ok" />
+    <MESSAGE value="fédération robuste ok+" />
+    <option name="LAST_COMMIT_MESSAGE" value="fédération robuste ok+" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ProjetReseau$EchoClient.ic" NAME="EchoClient Coverage Results" MODIFIED="1584006174534" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />

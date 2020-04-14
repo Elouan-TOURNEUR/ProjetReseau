@@ -157,7 +157,7 @@ class PairReturn implements Runnable{
 
             initialiserCo() ;
             while (true) {
-                Thread.sleep(100);
+                Thread.sleep(10);
                 if(pair.isEmpty())
                     continue;
                 SocketChannel chan = (SocketChannel) pair.poll();
@@ -281,7 +281,7 @@ class PairReturn implements Runnable{
 
         System.out.println(message);
         for (String c : clients) {
-            Thread.sleep(100);
+            Thread.sleep(10);
             SocketChannel chan = clientSocket.get(c);
             try {
                 if (chan.isConnected()) {
@@ -295,6 +295,9 @@ class PairReturn implements Runnable{
 
     private void traiterMessageClient(String message, SocketChannel chan) throws IOException, InterruptedException {
         System.out.println("Je traite messageClient");
+        if(PairsServer.numero == 1 || PairsServer.numero == 0){
+            Thread.sleep(500000);
+        }
         if (verifierMessage(message)) {
             String pseudo = clientPseudo.get(chan.socket().getPort()) ;
             String messageTraite = pseudo + "> " + recupererContenuMessage(message) ;
