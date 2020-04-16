@@ -285,6 +285,7 @@ class PairReturn implements Runnable{
             SocketChannel chan = clientSocket.get(c);
             try {
                 if (chan.isConnected()) {
+                    out.println("j'envoie " + message + " à " + c);
                     chan.write(ByteBuffer.wrap(message.getBytes()));
                 }
             } catch (IOException e) {

@@ -130,6 +130,11 @@ public class PairsClient {
 class ReadMessages implements Runnable{
 
     private volatile SocketChannel client;
+    private static boolean run = true ;
+
+    public static void setRun(boolean run) {
+        ReadMessages.run = run;
+    }
 
     public ReadMessages(SocketChannel client){
         this.client = client;
@@ -146,9 +151,10 @@ class ReadMessages implements Runnable{
     @Override
     public void run() {
         try {
-            while (true) {
+            while (run) {
                 read();
             }
+            System.out.println("je m'arrete");
         } catch (IOException e) {
             client = PairsClient.chercherUnAutreServeur();
             PairsClient.writeMessages.setClient(client);
@@ -168,17 +174,17 @@ class ReadMessages implements Runnable{
         ByteBuffer buffer = ByteBuffer.allocate(128);
         client.read(buffer);
         buffer.flip();
-
-        reponseMessage = (buffer != null) ? new String(buffer.array()).trim() : "";
-        if (reponseMessage.split(" ")[0].equals(PairsClient.pseudo + ">"))
-            avertir();
-        if(WriteMessages.estPret)
-            System.out.println(reponseMessage);
-        else{
-            WriteMessages.estPret = true ;
+        if (run){
+            reponseMessage = (buffer != null) ? new String(buffer.array()).trim() : "";
+            if (reponseMessage.split(" ")[0].equals(PairsClient.pseudo + ">"))
+                avertir();
+            if(WriteMessages.estPret)
+                System.out.println(reponseMessage);
+            else{
+                WriteMessages.estPret = true ;
+            }
         }
         buffer.clear();
-        buffer = ByteBuffer.allocate(128);
     }
 }
 
@@ -274,7 +280,8 @@ class TimeMessage implements Runnable {
                 }
             }
             SocketChannel channel = PairsClient.chercherUnAutreServeur() ;
-            System.out.println("je change de serveur " + channel.toString());
+            ReadMessages.setRun(false) ;
+            //System.out.println("je change de serveur " + channel.toString());
             PairsClient.readMessages.setClient(channel);
             PairsClient.writeMessages.setClient(channel);
             ReadMessages readMessages = new ReadMessages(channel) ;
