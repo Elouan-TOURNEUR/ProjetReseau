@@ -1,4 +1,4 @@
-package ServeurFedereRobuste;
+package Ameliorations.ServeurFedereRobuste;
 
 import java.beans.EventHandler;
 import java.io.IOException;

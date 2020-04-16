@@ -1,4 +1,4 @@
-package ServeurFedereRobuste;
+package Ameliorations.ServeurFedereRobuste;
 
 import java.nio.channels.SocketChannel;
 import java.util.Vector;
