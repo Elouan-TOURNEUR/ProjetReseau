@@ -1,4 +1,4 @@
-package ServeurFedereRobuste;
+package Ameliorations.ServeurFedereRobuste;
 
 import java.awt.image.WritableRenderedImage;
 import java.io.*;
