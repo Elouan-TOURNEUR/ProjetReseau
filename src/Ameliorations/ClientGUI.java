@@ -1,13 +1,11 @@
 package Ameliorations;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.nio.file.Files;
-import java.util.List;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -16,6 +14,7 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.scene.text.*;
 import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
 
 import static java.lang.System.exit;
 
@@ -25,11 +24,15 @@ public class ClientGUI extends Application {
     private Stage stage;
     public static volatile SocketChannel client;
     private static ByteBuffer buffer;
+    private static boolean first;
+    public static boolean changePseudo;
 
 
     public static void main(String[] args) {
         String ip;
         int port;
+        first = true;
+        changePseudo = false;
 
         if (args.length != 2) {
             /* erreur de syntaxe */
@@ -137,9 +140,23 @@ public class ClientGUI extends Application {
         messages.setMouseTransparent(true);
         messages.setFocusTraversable(false);
         messages.setText("Bienvenue sur le serveur !");
-        view.add(messages, 1,1,1,1);
+        view.add(messages, 1,1,2,1);
         TextField messageCl = new TextField();
-        view.add(messageCl,1,2,1,1);
+        view.add(messageCl,1,2,2,1);
+
+        TextField loginField = new TextField();
+        loginField.setOnAction(actionEvent -> {
+            login(loginField.getText());
+            changePseudo = true;
+        });
+        view.add(loginField,1,0,1,1);
+
+        Button button = new Button("Valider");
+        button.setOnMouseClicked(actionEvent -> {
+            login(loginField.getText());
+            changePseudo = true;
+        });
+        view.add(button, 2, 0, 1, 1);
 
         ByteBuffer buffer = ByteBuffer.allocate(128);
         messageCl.setOnAction(acctionEvent -> {
@@ -203,7 +220,7 @@ public class ClientGUI extends Application {
     }*/
 
 
-    public String login(String pseudo) {
+    public void login(String pseudo) {
         String response;
 
         try {
@@ -211,27 +228,32 @@ public class ClientGUI extends Application {
 
             entreeLogin = "LOGIN " + pseudo;
             ClientGUI.client.write(ByteBuffer.wrap(entreeLogin.getBytes()));
-            ClientGUI.client.read(buffer);
-            System.out.println(buffer);
 
-            response = (buffer != null) ? new String(buffer.array()).trim() : "";
-            buffer.clear();
-            System.out.println(response);
-            if (response.equals("ERROR LOGIN aborting chatamu protocol")) {
-                client.close();
-                return "ERROR LOGIN aborting chatamu protocol";
-            } else if (response.equals("ERROR LOGIN username")) {
-                response = "Pseudo déja pris.";
-            } else {
-                this.changeView(this.handleMainPane());
+            if(first){
+                ClientGUI.client.read(buffer);
+                System.out.println(buffer);
+
+                response = (buffer != null) ? new String(buffer.array()).trim() : "";
+                buffer.clear();
+                System.out.println(response);
+                if (response.equals("ERROR LOGIN aborting chatamu protocol")) {
+                    alert("Erreur de protocole");
+                } else if (response.equals("ERROR LOGIN username")) {
+                    alert("Pseudo déja pris");
+                } else {
+                    this.changeView(this.handleMainPane());
+                }
             }
 
         } catch (IOException e) {
-            response = "Erreur E/S socket";
+            alert("Erreur E/S socket");
             e.printStackTrace();
         }
+    }
 
-        return response;
+    public static void alert(String message){
+        Alert alert = new Alert(AlertType.ERROR, message, ButtonType.OK);
+        alert.showAndWait();
     }
 }
 
@@ -257,26 +279,12 @@ class ReadGUIMessages implements Runnable{
 
                 reponseMessage = (buffer != null) ? new String(buffer.array()).trim() : "";
 
-                if(reponseMessage.split(" ")[0].equals("CONNECT")){
-                    int localPort = ClientGUI.client.socket().getLocalPort();
-                    ClientGUI.client.close();
-
-                    String address = reponseMessage.split(" ")[1];
-                    int port = Integer.parseInt(reponseMessage.split(" ")[2]);
-
-                    ClientGUI.client = SocketChannel.open();
-                    ClientGUI.client.bind(new InetSocketAddress(localPort));
-                    // TODO problème de connexion de temps en temps
-                    ClientGUI.client.connect(new InetSocketAddress(address, port));
-
-                    System.out.println("Vous avez rejoint le server avec succès.");
-                } else if(reponseMessage.split(" ")[0].equals("ERROR")){
-                    // TODO traduire et afficher les erreurs
-                    System.err.println(reponseMessage);
+                if(reponseMessage.split(" ")[0].equals("ERROR")){
+                    //System.err.println(reponseMessage);
+                    //ClientGUI.alert(reponseMessage);
                 } else if(!reponseMessage.split(" ")[0].equals("OK")){
                     view.setText(view.getText()+"\n"+reponseMessage);
                 }
-                //System.out.println(reponseMessage);
 
                 buffer.clear();
                 buffer = ByteBuffer.allocate(128);
