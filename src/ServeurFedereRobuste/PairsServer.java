@@ -1,13 +1,11 @@
 package ServeurFedereRobuste;
 
-import java.beans.EventHandler;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
 import static java.lang.System.*;
 
 /*
@@ -157,7 +155,7 @@ class PairReturn implements Runnable{
 
             initialiserCo() ;
             while (true) {
-                Thread.sleep(100);
+                Thread.sleep(10);
                 if(pair.isEmpty())
                     continue;
                 SocketChannel chan = (SocketChannel) pair.poll();
@@ -281,10 +279,11 @@ class PairReturn implements Runnable{
 
         System.out.println(message);
         for (String c : clients) {
-            Thread.sleep(100);
+            Thread.sleep(10);
             SocketChannel chan = clientSocket.get(c);
             try {
                 if (chan.isConnected()) {
+                    out.println("j'envoie " + message + " à " + c);
                     chan.write(ByteBuffer.wrap(message.getBytes()));
                 }
             } catch (IOException e) {
@@ -295,6 +294,9 @@ class PairReturn implements Runnable{
 
     private void traiterMessageClient(String message, SocketChannel chan) throws IOException, InterruptedException {
         System.out.println("Je traite messageClient");
+        if(PairsServer.numero == 1 || PairsServer.numero == 0){
+            Thread.sleep(500000);
+        }
         if (verifierMessage(message)) {
             String pseudo = clientPseudo.get(chan.socket().getPort()) ;
             String messageTraite = pseudo + "> " + recupererContenuMessage(message) ;
