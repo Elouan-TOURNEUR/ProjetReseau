@@ -1,29 +1,45 @@
 package ServeurFedereRobuste;
 
+import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.util.Random;
-import java.util.Scanner;
+import java.sql.ParameterMetaData;
+import java.sql.SQLOutput;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import static java.lang.System.exit;
 
 public class PairsClient {
 
     public static ReadMessages readMessages;
     public static WriteMessages writeMessages;
-    public static SocketChannel[] listeClientServer;
+    public static int[] listeClientServer;
 
     public static Long[] tempsEmetteur ;
     public static boolean[] reçu ;
+
+    static Timer timer;
+    static ConcurrentLinkedQueue<String> messages;
+    static Thread threadWrite;
+    static Thread threadRead;
+    static int port;
+    static int portClient;
+    static String ip;
+    static SocketChannel client;
+    static Scanner scan;
 
     public static String pseudo = null ;
 
     public static void main(String[] args) throws IOException {
         Socket echoSocket; // la socket client
-        String ip; // adresse IPv4 du serveur en notation pointée
-        int port; // port TCP serveur
         boolean fini = false;
+        timer = new Timer();
+        messages = new ConcurrentLinkedQueue<>();
+        PairsClient.scan = new Scanner(System.in);
 
         /* Traitement des arguments */
         if (args.length != 2) {
@@ -43,43 +59,29 @@ public class PairsClient {
         System.out.println("Essai de connexion à  " + ip + " sur le port " + port + "\n");
 
 
-        listeClientServer = new SocketChannel[3] ;
-        SocketChannel clientServer1 = null;
-        listeClientServer[0] = clientServer1 ;
-        SocketChannel clientServer2 = null;
-        listeClientServer[1] = clientServer2 ;
-        SocketChannel clientServer3 = null;
-        listeClientServer[2] = clientServer3 ;
-
-        ByteBuffer buffer = null;
-
-        try {
-            for (int i = 0; i < 3 ; i++) {
-                listeClientServer[i] = SocketChannel.open(new InetSocketAddress(ip, port + i));
-            }
-            buffer = ByteBuffer.allocate(256);
-        } catch (IOException e) {
-            System.err.println("Connexion: hôte inconnu : " + ip);
-            e.printStackTrace();
+        listeClientServer = new int[3] ;
+        for (int i = 0; i < 3 ; i++) {
+            listeClientServer[i] = port + i;
         }
 
         /* Session */
-        traiterLogin(listeClientServer, buffer);
+        traiterLogin(ByteBuffer.allocate(128));
     }
 
-    public static void traiterLogin(SocketChannel[] clients, ByteBuffer buffer) {
+    public static void traiterLogin(ByteBuffer buffer) {
         try {
             String reponseLogin;
             String entreeLogin;
 
+            if((client==null) || (!client.isConnected()))
+                chercherUnAutreServeur();
+
+            portClient = client.socket().getLocalPort();
+
             System.out.println("LOGIN pseudo");
             Scanner scan = new Scanner(System.in);
             entreeLogin = scan.nextLine();
-            for (int i = 0; i < 3 ; i++) {
-                if (clients[i].isConnected())
-                    clients[i].write(ByteBuffer.wrap(entreeLogin.getBytes()));
-            }
-            SocketChannel client = chercherUnAutreServeur() ;
+            client.write(ByteBuffer.wrap(entreeLogin.getBytes()));
             client.read(buffer);
 
             reponseLogin = (buffer != null) ? new String(buffer.array()).trim() : "";
@@ -91,14 +93,14 @@ public class PairsClient {
             }
             else if (reponseLogin.equals("ERROR LOGIN username")) {
                 System.out.println("Pseudo déja pris.");
-                traiterLogin(clients, buffer);
+                traiterLogin(buffer);
             } else {
-                System.out.println("Vous avez rejoin le server avec succès.");
+                System.out.println("Vous avez rejoint le server avec succès.");
                 pseudo = entreeLogin.split(" ")[1] ;
                 readMessages = new ReadMessages(client);
                 writeMessages = new WriteMessages(client);
-                Thread threadRead = new Thread(readMessages);
-                Thread threadWrite = new Thread(writeMessages);
+                threadRead = new Thread(readMessages);
+                threadWrite = new Thread(writeMessages);
                 threadRead.start();
                 threadWrite.start();
             }
@@ -111,15 +113,32 @@ public class PairsClient {
     }
 
 
-    public static SocketChannel chercherUnAutreServeur() {
+    public static void chercherUnAutreServeur() {
         Random rand = new Random() ;
-        int nbAléa = rand.nextInt(3) ;
-        if (listeClientServer[nbAléa].isConnected()){
-            System.out.println(nbAléa);
-            return listeClientServer[nbAléa] ;
+        int nbAlea = rand.nextInt(3);
+
+        if((client != null) && (client.isConnected())){
+            try {
+                client.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            client = SocketChannel.open();
+            client.bind(new InetSocketAddress(portClient));
+            client.connect(new InetSocketAddress(PairsClient.ip, PairsClient.port+nbAlea));
+        } catch (IOException e) {
+            e.printStackTrace();
+            //chercherUnAutreServeur();
+        }
+        System.out.println(nbAlea);
+        /*if (client.isConnected()){
+            System.out.println(nbAlea);
         }
         else
-            return chercherUnAutreServeur() ;
+            chercherUnAutreServeur();*/
     }
 }
 
@@ -128,31 +147,31 @@ class ReadMessages implements Runnable{
     private volatile SocketChannel client;
     private static boolean run = true ;
 
-    public static void setRun(boolean run) {
+    /*public static void setRun(boolean run) {
         ReadMessages.run = run;
-    }
+    }*/
 
     public ReadMessages(SocketChannel client){
         this.client = client;
     }
 
-    public void setClient(SocketChannel client){
+    public synchronized void setClient(SocketChannel client){
         this.client = client;
     }
 
-    public void avertir(){
+    /*public void avertir(){
         TimeMessage.setReçu(true);
-    }
+    }*/
 
     @Override
     public void run() {
         try {
-            while (run) {
+            while (client.isConnected()) {
                 read();
             }
             System.out.println("je m'arrete");
         } catch (IOException e) {
-            client = PairsClient.chercherUnAutreServeur();
+            /*client = PairsClient.chercherUnAutreServeur();
             PairsClient.writeMessages.setClient(client);
             ReadMessages readMessages = new ReadMessages(client);
             Thread threadRead = new Thread(readMessages);
@@ -162,7 +181,8 @@ class ReadMessages implements Runnable{
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
-            threadRead.start();
+            threadRead.start();*/
+            //e.printStackTrace();
         }
     }
     public void read() throws IOException {
@@ -170,11 +190,18 @@ class ReadMessages implements Runnable{
         ByteBuffer buffer = ByteBuffer.allocate(128);
         client.read(buffer);
         buffer.flip();
-        if (run){
+        if (client.isConnected()){
             reponseMessage = (buffer != null) ? new String(buffer.array()).trim() : "";
-            if (reponseMessage.split(" ")[0].equals(PairsClient.pseudo + ">"))
-                avertir();
-            if(WriteMessages.estPret)
+            /*if (reponseMessage.split(" ")[0].equals(PairsClient.pseudo + ">") || reponseMessage.equals("ok")) {
+
+            }*/
+            if(reponseMessage.equals("OK")) {
+                WriteMessages.setCanReadIn(true);
+                PairsClient.timer.cancel();
+                //System.out.println("CANCELED");
+                PairsClient.messages.poll();
+                PairsClient.timer = new Timer();
+            } else if(WriteMessages.estPret)
                 System.out.println(reponseMessage);
             else{
                 WriteMessages.estPret = true ;
@@ -186,8 +213,9 @@ class ReadMessages implements Runnable{
 
 
 class WriteMessages implements Runnable{
-    public static TimeMessage timeMessage ;
+    //public static TimeMessage timeMessage ;
     private volatile SocketChannel client;
+    private static volatile boolean canReadIn;
     static public boolean estPret ;
     public static int indice = 0 ;
 
@@ -195,38 +223,52 @@ class WriteMessages implements Runnable{
         this.client = client;
     }
 
-    public void setClient(SocketChannel client){
+    public synchronized void setClient(SocketChannel client){
         this.client = client;
+    }
+
+    public static synchronized void setCanReadIn(boolean canReadIn){
+        WriteMessages.canReadIn = canReadIn;
     }
 
     @Override
     public void run() {
-        Scanner scan = new Scanner(System.in);
         ByteBuffer buffer = ByteBuffer.allocate(128);
         estPret = true ;
+        canReadIn = true;
         String entreeMessage = null;
+        PairsClient.scan = new Scanner(System.in);
 
         try {
-            while (true) {
+            while (client.isConnected()) {
+                while(!canReadIn){
+                    Thread.sleep(50);
+                }
+
                 System.out.println("MESSAGE message");
-                entreeMessage = scan.nextLine();
+                entreeMessage = PairsClient.scan.nextLine();
                 write(entreeMessage, buffer);
             }
 
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        } catch (InterruptedException ignored) {}
 
-        try {
+        /*try {
             client.close();
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
 
-        System.err.println("Fin de la session.");
-        exit(0);
+        //System.err.println("Fin de la session.");
+        //exit(0);
     }
-    public void write(String entreeMessage, ByteBuffer buffer) throws IOException {
+
+
+    private void write(String entreeMessage, ByteBuffer buffer) throws IOException, InterruptedException {
+        PairsClient.messages.add(entreeMessage);
+        if(!client.isConnected()) return;
+
         if(entreeMessage.equals("exit")){
             System.out.println("c'est la fin j'envoie un dernier message au serveur.");
             client.write(ByteBuffer.wrap(entreeMessage.getBytes()));
@@ -235,21 +277,66 @@ class WriteMessages implements Runnable{
             exit(0);
         }
         try {
-            Long time = System.nanoTime() ;
+            //Long time = System.nanoTime() ;
             client.write(ByteBuffer.wrap(entreeMessage.getBytes()));
-            TimeMessage timeMessage = new TimeMessage(time, entreeMessage) ;
+
+
+            GregorianCalendar gc = new GregorianCalendar();
+            gc.add(Calendar.SECOND, 3);
+            PairsClient.timer.schedule(new CheckResponseServer(), gc.getTime());
+
+            /*TimeMessage timeMessage = new TimeMessage(time, entreeMessage) ;
             Thread timeMess = new Thread(timeMessage);
-            timeMess.start();
+            timeMess.start();*/
         } catch (IOException e){
-            this.client = PairsClient.chercherUnAutreServeur();
-            PairsClient.readMessages.setClient(this.client);
+            /*this.client = PairsClient.chercherUnAutreServeur();
+            PairsClient.readMessages.setClient(this.client);*/
+            e.printStackTrace();
         }
         buffer.flip();
+        canReadIn = false;
     }
 }
 
 
-class TimeMessage implements Runnable {
+class CheckResponseServer extends TimerTask {
+
+    @Override
+    public void run() {
+
+        try {
+            PairsClient.client.write(ByteBuffer.wrap("DISCONNECT".getBytes()));
+            PairsClient.client.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        PairsClient.threadWrite.interrupt();
+        PairsClient.threadRead.interrupt();
+
+        /*try {
+            Thread.sleep(100);
+            Robot robot = new Robot();
+            robot.keyPress(KeyEvent.VK_ENTER);
+            Thread.sleep(50);
+            robot.keyRelease(KeyEvent.VK_ENTER);
+        } catch (AWTException | InterruptedException e) {
+            e.printStackTrace();
+        }*/
+
+        PairsClient.chercherUnAutreServeur();
+        PairsClient.readMessages = new ReadMessages(PairsClient.client);
+        PairsClient.writeMessages = new WriteMessages(PairsClient.client);
+        PairsClient.threadRead = new Thread(PairsClient.readMessages);
+        PairsClient.threadWrite = new Thread(PairsClient.writeMessages);
+        PairsClient.threadRead.start();
+        PairsClient.threadWrite.start();
+    }
+}
+
+
+
+/*class TimeMessage implements Runnable {
     private long tempsReferant ;
     private String message ;
     private static long seuil = 2 ;
@@ -289,4 +376,4 @@ class TimeMessage implements Runnable {
             ex.printStackTrace();
         }
     }
-}
+}*/

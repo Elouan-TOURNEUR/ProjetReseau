@@ -407,7 +407,9 @@
       <workItem from="1586766501410" duration="11596000" />
       <workItem from="1586812812387" duration="1462000" />
       <workItem from="1586855533068" duration="6248000" />
-      <workItem from="1587042946413" duration="1041000" />
+      <workItem from="1587042946413" duration="2669000" />
+      <workItem from="1587131062199" duration="22284000" />
+      <workItem from="1587218736305" duration="10075000" />
     </task>
     <task id="LOCAL-00001" summary="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé">
       <created>1584557598849</created>

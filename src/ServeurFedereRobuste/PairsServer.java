@@ -91,6 +91,11 @@ class PairRecup implements Runnable {
                         SocketChannel csc = server.accept();
                         csc.configureBlocking(false);
                         csc.register(select, SelectionKey.OP_READ);
+
+                        int port = csc.socket().getPort();
+                        if(PairReturn.stateClient.containsKey(port)){
+                            PairReturn.clientSocket.put(PairReturn.clientPseudo.get(port), csc);
+                        }
                     }
                     keys.remove();
                 }
@@ -119,9 +124,9 @@ class PairReturn implements Runnable{
     private static List<String> serveursDisponnibles = new ArrayList<>() ;
 
 
-    private static HashMap<Integer, String> clientPseudo = new HashMap<>();
+    public static HashMap<Integer, String> clientPseudo = new HashMap<>();
 
-    public static  HashMap<String, SocketChannel> clientSocket = new HashMap<>();
+    public static volatile HashMap<String, SocketChannel> clientSocket = new HashMap<>();
     public static HashMap<String, SocketChannel> serveursNames = new HashMap<>();
 
     public static HashMap<SocketChannel, Integer> socketChannelServerPort = new HashMap<>();
@@ -135,7 +140,8 @@ class PairReturn implements Runnable{
     private ServerSocketChannel server;
     private static SocketChannel client;
 
-    public static HashMap<SocketChannel, Integer> stateClient = new HashMap<>() ;
+    //                   n° PORT | STATE
+    public static HashMap<Integer, Integer> stateClient = new HashMap<>() ;
 
     private static Vector<Integer> broadcast = new Vector<>(PairsServer.nbPairs);
 
@@ -160,14 +166,21 @@ class PairReturn implements Runnable{
                     continue;
                 SocketChannel chan = (SocketChannel) pair.poll();
                 String message = (String) pair.poll();
-                if(messageInitialiserCo(message))
+                if(message == null) continue;
+
+                if(message.split(" ")[0].equals("INITIALISER"))
                     traiterInitialiserCo(chan, message);
-                else if (messageServeur(chan))
-                    traiterMessageServeur(chan, message) ;
-                else if (!clientPseudo.containsKey(chan.socket().getPort()))
+                else if (messageServeur(chan)) {
+                    if(message.split(" ")[5].equals("LOGCLIENT"))
+                        traiterLoginServeur(message.split(" ", 6)[5], chan);
+                    else
+                        traiterMessageServeur(chan, message);
+                }else if (!clientPseudo.containsKey(chan.socket().getPort()))
                     traiterLogin(message, chan);
-                else if (stateClient.get(chan).equals(STATE_MESSAGE))
+                else if (STATE_MESSAGE == stateClient.get(chan.socket().getPort()))
                     traiterMessageClient(message, chan);
+                else if(message.equals("DISCONNECT"))
+                    traiterDisconnectClient(chan);
             }
         } catch (InterruptedException | IOException e) {
             e.printStackTrace();
@@ -176,13 +189,25 @@ class PairReturn implements Runnable{
         exit(0);
     }
 
+    private void traiterDisconnectClient(SocketChannel chan) throws IOException {
+        clientSocket.remove(clientPseudo.get(chan.socket().getPort()));
+        chan.close();
+    }
 
+    private void traiterLoginServeur(String message, SocketChannel chan) throws IOException {
+        if(!serveursNames.containsValue(chan)){
+            chan.write(ByteBuffer.wrap("ERROR SERVER LOGIN".getBytes()));
+            return;
+        }
+        String msg = recupererContenuMessage(message);
+        String[] split = msg.split(" ");
+        int port = Integer.parseInt(split[1]);
+        String pseudo = split[0];
 
-    private boolean messageInitialiserCo(String message) {
-        String first = message.split(" ")[0] ;
-        if (first.equals("INITIALISER"))
-            return true ;
-        return false ;
+        clientPseudo.put(port, pseudo);
+        //clientSocket.put(pseudo, chan) ;
+        clients.add(pseudo) ;
+        stateClient.put(port, STATE_MESSAGE) ;
     }
 
     private static void initialiserCo() throws IOException {
@@ -195,7 +220,7 @@ class PairReturn implements Runnable{
             if (port.equals(PairsServer.port)){
                 continue;
             }
-            System.out.println("j'envoi un message chez " + port);
+            System.out.println("j'envoie un message chez " + port);
             client = SocketChannel.open(new InetSocketAddress("127.0.0.1", port));
             socketCoServer[indice_socketCoServer] = client ;
             ++indice_socketCoServer ;
@@ -244,6 +269,7 @@ class PairReturn implements Runnable{
             indice = indice + 2 ;
             vector.set(i, Integer.parseInt(str)) ;
         }
+
         Message messageObjet = new Message(messageString, vector) ;
         receive_co_broadcast(messageObjet, chan, numero);
     }
@@ -252,9 +278,9 @@ class PairReturn implements Runnable{
     private void receive_co_broadcast(Message message, SocketChannel channel, int numero) throws IOException, InterruptedException {
         System.out.println("Je traite receive co_broadcast");
         if (!traitementPossible(message)){
-            String envoi = PairsServer.numero.toString() + " " + message.broadcast.toString() + " " + message.message ;
+            /*String envoi = PairsServer.numero.toString() + " " + message.broadcast.toString() + " " + message.message ;
             pair.add(channel) ;
-            pair.add(envoi) ;
+            pair.add(envoi) ;*/
             System.out.println("Pas le moment.");
         }
         else {
@@ -278,13 +304,18 @@ class PairReturn implements Runnable{
         broadcast.set(numero, broadcast.get(numero)+1) ;
 
         System.out.println(message);
-        for (String c : clients) {
+        //for (String c : clients) {
+        for (String c : clientSocket.keySet()) {
             Thread.sleep(10);
             SocketChannel chan = clientSocket.get(c);
             try {
                 if (chan.isConnected()) {
-                    out.println("j'envoie " + message + " à " + c);
-                    chan.write(ByteBuffer.wrap(message.getBytes()));
+                    boolean isServerMsg = message.split(" ")[0].equals("SERVER");
+                    if(!isServerMsg || serveursNames.containsValue(chan)){
+                        out.println("j'envoie " + message + " à " + c);
+                        out.println(clientPseudo.get(chan.socket().getPort()));
+                        chan.write(ByteBuffer.wrap(message.getBytes()));
+                    }
                 }
             } catch (IOException e) {
                 continue;
@@ -301,6 +332,7 @@ class PairReturn implements Runnable{
             String pseudo = clientPseudo.get(chan.socket().getPort()) ;
             String messageTraite = pseudo + "> " + recupererContenuMessage(message) ;
             Message messageObjet = new Message(messageTraite, broadcast) ;
+            chan.write(ByteBuffer.wrap("OK".getBytes()));
             co_broadcast(messageObjet);
         }
         else {
@@ -355,7 +387,7 @@ class PairReturn implements Runnable{
 
 
 
-    private static void traiterLogin(String entree, SocketChannel chan) throws IOException {
+    private void traiterLogin(String entree, SocketChannel chan) throws IOException, InterruptedException {
         System.out.println("Je traite login");
         if(!verifierConnexion(entree)){
             if (chan.isConnected())
@@ -375,8 +407,11 @@ class PairReturn implements Runnable{
             clientPseudo.put(portSocket, pseudo);
             clientSocket.put(pseudo, chan) ;
             clients.add(pseudo) ;
-            stateClient.put(chan, STATE_MESSAGE) ;
+            stateClient.put(chan.socket().getPort(), STATE_MESSAGE) ;
             chan.write(ByteBuffer.wrap("ok".getBytes())) ;
+
+            String brdcst = "SERVER LOGCLIENT " + pseudo + " " + portSocket;
+            co_broadcast(new Message(brdcst, broadcast));
         }
     }
 
