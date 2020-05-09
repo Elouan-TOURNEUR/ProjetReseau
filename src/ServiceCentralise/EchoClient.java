@@ -3,21 +3,23 @@ package ServiceCentralise;
 import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
 import java.util.Scanner;
 
 import static java.lang.System.exit;
 
+/*
+* Client simple :
+*     - Demande un pseudo à l'utilisateur, et le transmet au serveur
+*     - Attend les messages de l'utilisateur et les transmet au serveur
+*     - Affiche (sur le terminal) les messages reçus du serveur
+* Mise en place de 2 threads à cause Scanner qui est bloquant.
+*/
 public class EchoClient {
 
-    public static void main(String[] args) throws IOException {
-        Socket echoSocket; // la socket client
+    public static void main(String[] args) {
         String ip; // adresse IPv4 du serveur en notation pointée
         int port; // port TCP serveur
-        boolean fini = false;
 
         /* Traitement des arguments */
         if (args.length != 2) {
@@ -50,9 +52,9 @@ public class EchoClient {
 
         /* Session */
         traiterLogin(client, buffer);
-
-
     }
+
+    /* Demande du login au client */
     public static void traiterLogin(SocketChannel client, ByteBuffer buffer){
         try {
             String reponseLogin;
@@ -66,6 +68,7 @@ public class EchoClient {
             client.read(buffer);
 
             reponseLogin = (buffer != null) ? new String(buffer.array()).trim() : "";
+            // Traitement des erreurs
             if (reponseLogin.equals("ERROR LOGIN aborting chatamu protocol")) {
                 System.out.println(reponseLogin);
                 client.close();
@@ -76,11 +79,11 @@ public class EchoClient {
                 buffer.clear();
                 traiterLogin(client, buffer);
             }
-            else {
 
+            else {
                 buffer.clear();
 
-
+                // Lancement des threads pour l'envoie et la réception des messages
                 Thread threadRead = new Thread(new ReadMessages(client));
                 Thread threadWrite = new Thread(new WriteMessages(client));
                 threadRead.start();
@@ -95,6 +98,9 @@ public class EchoClient {
     }
 }
 
+/*
+* Thread de réception des messages et les affiche
+*/
 class ReadMessages implements Runnable{
 
     private SocketChannel client;
@@ -126,7 +132,9 @@ class ReadMessages implements Runnable{
     }
 }
 
-
+/*
+* Thread de lecture et d'envoie des messages de ce client
+*/
 class WriteMessages implements Runnable{
 
     private SocketChannel client;
@@ -147,6 +155,7 @@ class WriteMessages implements Runnable{
                 System.out.println("MESSAGE message");
                 entreeMessage = scan.nextLine();
 
+                /* Déconnecte la session et ferme l'application */
                 if(entreeMessage.equals("exit")){
                     System.out.println("c'est la fin j'envoie un dernier message au serveur.");
                     client.write(ByteBuffer.wrap(entreeMessage.getBytes()));

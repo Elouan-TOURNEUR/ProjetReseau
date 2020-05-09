@@ -14,21 +14,26 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/* Serveur esclave de la fédération de serveur */
 public class SlaveServeur {
 
+    /* Nom du serveur */
     private static String name = null;
 
+    /* Socket vers le serveur maître */
     private static  SocketChannel master = null;
 
     /* Liste qui contient toutes les socketsChannels */
     private static List<SocketChannel> listeSocket = new ArrayList<>();
 
+    /* Liste des messages déterminant l'ordre d'affichage */
     private static ConcurrentLinkedQueue<String> messages = new ConcurrentLinkedQueue<>();
 
 
     public static void main(String[] args) throws IOException {
         int argc = args.length;
 
+        // Traitement des arguments
         if (argc == 1) {
             name = args[0];
         } else {
@@ -41,8 +46,10 @@ public class SlaveServeur {
         int port = 0;
         int portMaster = 0;
 
+        // Lecture des infos serveurs dans le fichier de configuration
         List<String> lConf = Files.readAllLines(new File("./src/pairs.cfg").toPath());
 
+        // Chargement des infos de config
         for(String conf : lConf){
             String[] confSplit = conf.split(" = ");
             if(confSplit[0].equals("master")){
@@ -70,7 +77,7 @@ public class SlaveServeur {
         ssc.register(select, SelectionKey.OP_ACCEPT);
         ByteBuffer buffer = ByteBuffer.allocate(128);
 
-
+        // Boucle sur le selecteur
         while(true){
             select.select();
             Iterator<SelectionKey> keys = select.selectedKeys().iterator();
@@ -92,6 +99,7 @@ public class SlaveServeur {
                     String entree = new String(msg.array()).trim();
                     String keyword = entree.split(" ")[0];
 
+                    // Traitement d'actions en fonction du mot clé reçu
                     switch (keyword){
                         case "MESSAGE":
                             traiterMessage(entree, chan, select); break;
@@ -140,6 +148,7 @@ public class SlaveServeur {
         }
     }
 
+    /* Traitement de la déconnexion d'un client */
     private static void traiterFin(String entree, SocketChannel chan) throws IOException {
         if(!entree.equals("EXIT"))
             entree = "EXIT";
@@ -149,12 +158,13 @@ public class SlaveServeur {
         master.write(ByteBuffer.wrap(message.getBytes()));
     }
 
+    /* Envoie de la liste des serveurs au client qui a demandé */
     private static void traiterList(String entree, SocketChannel chan) throws IOException {
         String message = entree + " " + chan.socket().getInetAddress().toString() + " " + chan.socket().getPort();
         master.write(ByteBuffer.wrap(message.getBytes()));
     }
 
-
+    /* Traitement d'un message destiné à un client en particulier */
     private static void traiterMessagePersonnel(String entree) throws IOException {
         String message = recupererContenuMessage(entree);
         String[] split = message.split(" ", 4);
@@ -168,6 +178,7 @@ public class SlaveServeur {
         }
     }
 
+    /* Traitement du login */
     private static void traiterLogin(String entree, SocketChannel chan) throws IOException {
         String login = recupererContenuLogin(entree);
         String message = "LOGCLIENT " + login + " " +  chan.socket().getPort();
@@ -175,11 +186,14 @@ public class SlaveServeur {
         traiterErreur(chan);
     }
 
+    /* Traitement de la réplication d'un message */
     private static void traiterReplicationSalon(String entree, SocketChannel chan, Selector select) throws IOException {
         String message = recupererContenuMessage(entree);
         messages.add(message);
         chan.register(select, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
     }
+
+    /* Traitement des messages */
     private static void traiterMessage(String entree, SocketChannel chan, Selector select) throws IOException {
         if (!verifierMessage(entree)) {
             String messageErreur = "ERROR chatamu";
@@ -194,6 +208,7 @@ public class SlaveServeur {
         chan.register(select, SelectionKey.OP_READ);
     }
 
+    /* Traitement de la connexion au salon */
     private static void traiterConnexionSalon(String entree, SocketChannel chan) throws IOException {
         String message  = entree + " " + chan.socket().getPort();
         master.write(ByteBuffer.wrap(message.getBytes()));
@@ -209,6 +224,7 @@ public class SlaveServeur {
         }
     }
 
+    /* Traitement des erreurs pour un client connecté sur ce serveur */
     private static void traiterErreur(SocketChannel chan) throws IOException {
         ByteBuffer response = ByteBuffer.allocate(128);
         master.read(response);

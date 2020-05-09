@@ -1,6 +1,5 @@
 package ServiceCentralise;
 
-import javax.naming.ldap.SortKey;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -14,9 +13,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/*
+* Serveur du service centralise correspondant au seul serveur
+* recevant et envoyant les messages entre les clients.
+*/
 public class ChatamuCentral {
     /*
-
     Proposer une architecture à base de files d'attente (https://docs.oracle.com/javase/8/docs/api/java/util/Queue.html) associées à chaque client, permettant de
     utiliser ces files en mode producteurs-consommateur
     où les producteurs transmettent les messages envoyés par un client sur l'ensemble des autres files d'attentes
@@ -61,7 +63,7 @@ public class ChatamuCentral {
         ssc.register(select, SelectionKey.OP_ACCEPT);
         ByteBuffer buffer = ByteBuffer.allocate(128);
 
-
+        // Boucle sur le selecteur
         while(true){
             select.select();
             Iterator<SelectionKey> keys = select.selectedKeys().iterator();
@@ -82,6 +84,7 @@ public class ChatamuCentral {
                     ByteBuffer msg = buffer.flip();
                     String entree = new String(msg.array()).trim();
 
+                    // Si le port du client à déjà été enregistré à un pseudo
                     if(map.containsKey(chan.socket().getPort())) {
                         traiterMessage(entree, chan, select);
                     }
@@ -119,6 +122,7 @@ public class ChatamuCentral {
 
     }
 
+    /* Retourne le channel correspondant à la file d'attente */
     private static SocketChannel getChan(ConcurrentLinkedQueue fileAttente) {
         for (SocketChannel socketChannel : listeSocket){
             if (filesAttentes.get(socketChannel) == fileAttente){
@@ -128,6 +132,7 @@ public class ChatamuCentral {
         return null ;
     }
 
+    /* Traite la réception d'un message et l'ajoute dans les files des autres clients */
     private static void traiterMessage(String entree, SocketChannel chan, Selector select) throws IOException {
         if(entree.equals("exit"))
             supprimerFileAttente(chan);
@@ -146,8 +151,8 @@ public class ChatamuCentral {
         }
     }
 
+    /* Traite la réception d'un login */
     private static void traiterLogin(String entree, SocketChannel chan) throws IOException {
-
         if(!verifierConnexion(entree)){
             chan.write(ByteBuffer.wrap("ERROR LOGIN aborting chatamu protocol".getBytes()));
         }
@@ -223,7 +228,6 @@ public class ChatamuCentral {
 
         /* on supprime la file d'attente */
         filesAttentes.remove(socketChannel) ;
-
         listeSocket.remove(socketChannel) ;
     }
 }

@@ -1,13 +1,11 @@
 package Ameliorations.ServeurFedereRobuste;
 
-import java.beans.EventHandler;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
 import static java.lang.System.*;
 
 /*
@@ -20,10 +18,20 @@ import static java.lang.System.*;
  */
 
 public class PairsServer {
+
+    /* Nom du serveur */
     public static String name = null;
+
+    /* Port du serveur */
     public static Integer port = null;
+
+    /* IP du serveur */
     private static String ip = "127.0.0.1";
+
+    /* Nombre de paires du serveur robuste */
     public static Integer nbPairs = null ;
+
+    /* Numéro du serveur */
     public static Integer numero = null ;
 
     public static void main(String[] args) throws IOException {
@@ -68,6 +76,8 @@ class PairRecup implements Runnable {
             Selector select = Selector.open();
             server.register(select, SelectionKey.OP_ACCEPT);
             ByteBuffer buffer = ByteBuffer.allocate(128);
+
+            // Boucle sur le selecteur
             while (true) {
                 select.select();
                 Iterator<SelectionKey> keys = select.selectedKeys().iterator();

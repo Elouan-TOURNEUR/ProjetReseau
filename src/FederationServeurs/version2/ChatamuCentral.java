@@ -9,6 +9,9 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/*
+* Serveur maître de la fédération de serveur
+*/
 public class ChatamuCentral {
 
     /* Map qui associe un port client à un pseudo */
@@ -20,19 +23,23 @@ public class ChatamuCentral {
     /* Map qui associe un serveur à un nom */
     private static HashMap<String, SocketChannel> serveursNames = new HashMap<>() ;
 
+    /* Map qui associe un SocketChannel de réception d'un serveur à un SocketChannel client vers ces serveurs */
     private static HashMap<SocketChannel, SocketChannel> serveurCommunication = new HashMap<>();
 
     /* Liste du master qui détermine l'ordre d'affichage */
     private static ConcurrentLinkedQueue<String> master = new ConcurrentLinkedQueue<>() ;
 
+    /* Serveur courant */
     private static ServerSocketChannel server;
 
     public static void main(String[] args) throws IOException {
         String address = "";
         int port = 0;
 
+        // Lecture des infos serveurs dans le fichier de configuration
         List<String> lConf = Files.readAllLines(new File("./src/pairs.cfg").toPath());
 
+        // Chargement des infos de config
         for(String conf : lConf){
             String[] confSplit = conf.split(" = ");
             String[] split = confSplit[1].split(" ");
@@ -58,11 +65,13 @@ public class ChatamuCentral {
             //serveursDisponibles.add("master");
             serveursNames.put("master", null);
 
+            // Boucle sur le selecteur
             while (true) {
                 select.select();
                 Iterator<SelectionKey> keys = select.selectedKeys().iterator();
 
                 while (keys.hasNext()) {
+                    // Simulation d'une défaillance
                     /*if (System.nanoTime()/1000000000 - timeReferant/1000000000 > 180)
                         return ;
                     if (System.nanoTime()/1000000000 - time/1000000000 > 15) {
@@ -85,6 +94,7 @@ public class ChatamuCentral {
                         String entree = new String(msg.array()).trim();
                         String keyword = entree.split(" ")[0];
 
+                        // Traitement d'actions en fonction du mot clé reçu
                         switch (keyword){
                             case "MESSAGE":
                                 traiterMessages(entree, chan, select); break;
@@ -123,12 +133,15 @@ public class ChatamuCentral {
                             chan.register(select, SelectionKey.OP_READ);
                             continue;
                         }
+
                         System.out.println(recupererContenuMessage(message));
+                        // Ecriture du message sur les serveurs pairs
                         for(SocketChannel channel : serveursNames.values()){
                             if(channel != null)
                                 serveurCommunication.get(channel).write(ByteBuffer.wrap(message.getBytes()));
                         }
                         message = recupererContenuMessage(message);
+                        // Ecriture du message sur les clients directement connectés
                         for(SocketChannel channel : listeSocketClient){
                             channel.write(ByteBuffer.wrap(message.getBytes()));
                         }
@@ -145,6 +158,7 @@ public class ChatamuCentral {
 
     }
 
+    /* Traitement de la déconnexion d'un client */
     private static void traiterFin(String entree, SocketChannel chan) throws IOException {
         int port;
         if(serveursNames.containsValue(chan)){
@@ -159,7 +173,7 @@ public class ChatamuCentral {
         System.out.println(clientPseudo.remove(port));
     }
 
-
+    /* Ajout d'un client dans la Map */
     private static void traiterAjoutClient(String entree, SocketChannel chan) throws IOException {
         if(!serveursNames.containsValue(chan)){
             chan.write(ByteBuffer.wrap("ERROR SERVER LOGIN".getBytes()));
@@ -174,6 +188,7 @@ public class ChatamuCentral {
         chan.write(ByteBuffer.wrap("OK".getBytes()));
     }
 
+    /* Traitement de la connexion d'un serveur esclave */
     private static void traiterOuvertureSalon(String entree, SocketChannel chan) throws IOException {
         String nomSalon = entree.split(" ")[1] ;
         String portString = entree.split(" ")[2] ;
@@ -188,6 +203,7 @@ public class ChatamuCentral {
         listeSocketClient.remove(chan);
     }
 
+    /* Traitement de la déconnexion d'un serveur esclave*/
     private static void traiterFermetureSalon(String entree, SocketChannel chan) {
         String nomSalon = entree.split(" ")[1] ;
         System.out.println("Le serveur " + nomSalon + " a fermé.");
@@ -195,6 +211,7 @@ public class ChatamuCentral {
         serveurCommunication.remove(chan);
     }
 
+    /* Traitement du login */
     private static void traiterLogin(String entree, SocketChannel chan, Selector select) throws IOException {
         if(!verifierConnexion(entree)){
             chan.write(ByteBuffer.wrap("ERROR LOGIN aborting chatamu protocol".getBytes()));
@@ -218,6 +235,7 @@ public class ChatamuCentral {
         }
     }
 
+    /* Envoie de la liste des serveurs au client qui a demandé */
     private static void traiterList(String entree, SocketChannel chan) throws IOException {
         StringBuilder listeSalon = new StringBuilder();
         for (String salon : serveursNames.keySet()) {
@@ -232,6 +250,7 @@ public class ChatamuCentral {
         }
     }
 
+    /* Traitement de la connexion au salon et replication de la notification sur les autres serveurs */
     private static void traiterConnexionSalon(String entree, SocketChannel chan, Selector select) throws IOException {
         String name = entree.split(" ")[1];
         if(!verifierServeur(name)){
@@ -283,7 +302,7 @@ public class ChatamuCentral {
 
     }
 
-    // TODO : verifier que REPLIC vient bien du serveur maitre
+    /* Traitement des messages et réplication sur les autres serveurs */
     private static void traiterMessages(String entree, SocketChannel chan, Selector select) throws IOException {
         if (!verifierMessage(entree)) {
             String messageErreur = "ERROR chatamu";

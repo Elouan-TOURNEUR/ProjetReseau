@@ -5,9 +5,6 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
@@ -15,16 +12,27 @@ import javafx.stage.Stage;
 import javafx.scene.text.*;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-
 import static java.lang.System.exit;
 
+/* Client GUI */
 public class ClientGUI extends Application {
 
+    /* Info reçu par le serveur */
     private String info;
+
+    /* Stage de l'interface permettant de changer de scène */
     private Stage stage;
+
+    /* Socket de ce client */
     public static volatile SocketChannel client;
+
+    /* Buffer */
     private static ByteBuffer buffer;
+
+    /* Correspond à la première fois que l'on change son pseudo : permet de savoir si l'on change de scène ou non */
     private static boolean first;
+
+    /**/
     public static boolean changePseudo;
 
 
@@ -34,6 +42,7 @@ public class ClientGUI extends Application {
         first = true;
         changePseudo = false;
 
+        /* Traitement des arguments */
         if (args.length != 2) {
             /* erreur de syntaxe */
             System.out.println("Usage: java ClientGUI ipServer port");
@@ -61,7 +70,7 @@ public class ClientGUI extends Application {
             e.printStackTrace();
         }
 
-
+        // Lance l'interface (appelle start)
         launch(args);
     }
 
@@ -77,7 +86,7 @@ public class ClientGUI extends Application {
 
     }
 
-
+    /* Changer de vue */
     private void changeView(GridPane view){
         this.stage.setScene(new Scene(view));
         this.stage.show();
@@ -107,6 +116,7 @@ public class ClientGUI extends Application {
         return view;
     }*/
 
+    /* Change de vue pour le login */
     private GridPane handleLogin(){
         GridPane view = new GridPane();
         this.info = "Choisissez votre nom utilisateur :";
@@ -127,6 +137,7 @@ public class ClientGUI extends Application {
         return view;
     }
 
+    /* Change du vue pour le chat */
     private GridPane handleMainPane(){
         GridPane view = new GridPane();
         view.add(new Text(this.info), 1,0,1,1);
@@ -219,7 +230,7 @@ public class ClientGUI extends Application {
         return response;
     }*/
 
-
+    /* Demande du login au client */
     public void login(String pseudo) {
         String response;
 
@@ -258,7 +269,7 @@ public class ClientGUI extends Application {
 }
 
 
-
+/* Thread pour la lecture et l'envoie de message pour ce client */
 class ReadGUIMessages implements Runnable{
 
     private TextInputControl view;

@@ -6,23 +6,36 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.SocketChannel;
 import java.util.Scanner;
-
 import static java.lang.System.exit;
-import static java.lang.System.out;
 
+/*
+* Client libre :
+*   - (Re)Login libre à n'importe quel moment
+*   - Reconnexion vers un serveur à n'importe quel moment
+*   - Attend les messages de l'utilisateur et les transmet au serveur
+*   - Affiche (sur le terminal) les messages reçus du serveur
+*   - Peut se déconnecter sur les serveurs
+*/
 public class EchoClient {
 
+    /* Socket client */
     static volatile SocketChannel client;
+
+    /* Classe d'écriture des messages (Runnable) */
     static volatile WriteMessages writeMessages;
+
+    /* Classe de lecture des messages (Runnable) */
     static volatile ReadMessages readMessages;
+
+    /* Thread d'écriture des messages et envoie sur le serveur */
     static volatile Thread threadWrite;
+
+    /* Thread de lecture des messages du serveur */
     static volatile Thread threadRead;
 
-    public static void main(String[] args) throws IOException {
-        Socket echoSocket; // la socket client
+    public static void main(String[] args) {
         String ip; // adresse IPv4 du serveur en notation pointée
         int port; // port TCP serveur
-        boolean fini = false;
 
         /* Traitement des arguments */
         if (args.length != 2) {
@@ -60,6 +73,7 @@ public class EchoClient {
     }
 }
 
+/* Thread de lecture des messages du serveur et affichage */
 class ReadMessages implements Runnable{
 
     public ReadMessages(){}
@@ -76,6 +90,7 @@ class ReadMessages implements Runnable{
 
                 reponseMessage = (buffer != null) ? new String(buffer.array()).trim() : "";
 
+                // Reconnexion sur un autre serveur
                 if(reponseMessage.split(" ")[0].equals("CONNECT")){
                     int localPort = EchoClient.client.socket().getLocalPort();
                     EchoClient.client.close();
@@ -85,7 +100,7 @@ class ReadMessages implements Runnable{
 
                     EchoClient.client = SocketChannel.open();
                     EchoClient.client.bind(new InetSocketAddress(localPort));
-                    // TODO problème de connexion de temps en temps
+                    // !!!! Problème de connexion de temps en temps !!!!
                     EchoClient.client.connect(new InetSocketAddress(address, port));
 
                     System.out.println("Vous avez rejoint le server avec succès.");
@@ -105,7 +120,7 @@ class ReadMessages implements Runnable{
     }
 }
 
-
+/* Thread d'envoie des messages au serveur */
 class WriteMessages implements Runnable{
 
     public WriteMessages(){}
@@ -122,6 +137,7 @@ class WriteMessages implements Runnable{
                 System.out.println("MESSAGE message");
                 entreeMessage = scan.nextLine();
 
+                /* Déconnecte la session et ferme l'application */
                 if(entreeMessage.equals("EXIT")){
                     EchoClient.client.write(ByteBuffer.wrap(entreeMessage.getBytes()));
                     EchoClient.threadRead.interrupt();

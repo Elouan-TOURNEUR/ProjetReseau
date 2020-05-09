@@ -10,8 +10,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.nio.*;
 
+/*
+* Première version du serveur SalonCentral qui n'affiche les messages du salon
+* que sur la sortie standard du serveur.
+* Serveur du service centralise correspondant au seul serveur
+* recevant et envoyant les messages entre les clients.
+*/
 class SalonCentral {
 
+    /* Map qui associe un numéro de port client à un pseudo */
     private static HashMap<Integer, String> map = new HashMap<>();
 
     public static void main(String[] args) throws IOException {
@@ -38,6 +45,7 @@ class SalonCentral {
         ssc.register(select, SelectionKey.OP_ACCEPT);
         ByteBuffer buffer = ByteBuffer.allocate(128);
 
+        /* Boucle sur le selecteur */
         while(true){
             select.select();
             Iterator<SelectionKey> keys = select.selectedKeys().iterator();
@@ -58,9 +66,8 @@ class SalonCentral {
                     ByteBuffer msg = buffer.flip();
 
                     String entree = new String(msg.array()).trim();
-                    //String entree = new String(buffer.array()).trim();
 
-                    //System.out.println(chan.socket().getPort());
+                    // Si le port du client à déjà été enregistré à un pseudo
                     if(map.containsKey(chan.socket().getPort())) {
                         traiterMessage(entree, chan);
                     }
@@ -68,17 +75,12 @@ class SalonCentral {
                         traiterLogin(entree, chan);
                     }
 
-                    //buffer.clear();
                     buffer = ByteBuffer.allocate(128);
-
-                    //chan.register(select, SelectionKey.OP_READ);
-                    //chan.close();
 
                 } else if(key.isAcceptable()){
                     SocketChannel csc = ssc.accept();
                     csc.configureBlocking(false);
                     csc.register(select, SelectionKey.OP_READ);
-                    //csc.register(select, SelectionKey.OP_WRITE);
                 }
 
                 keys.remove();
@@ -87,8 +89,8 @@ class SalonCentral {
 
     }
 
+    /* Traite la réception d'un message et l'ajoute dans les files des autres clients */
     private static void traiterMessage(String entree, SocketChannel chan) throws IOException {
-
         if(!verifierMessage(entree)){
             chan.write(ByteBuffer.wrap("ERROR chatamu".getBytes()));
         } else{
@@ -101,15 +103,14 @@ class SalonCentral {
         }
     }
 
+    /* Traite la réception d'un login */
     private static void traiterLogin(String entree, SocketChannel chan) throws IOException {
-
         if(!verifierConnexion(entree)){
             chan.write(ByteBuffer.wrap("ERROR LOGIN aborting chatamu protocol".getBytes()));
         } else{
             String pseudo = recupererContenuLogin(entree) ;
             int portSocket = chan.socket().getPort();
             map.put(portSocket, pseudo);
-            //System.out.println(map);
 
             chan.write(ByteBuffer.wrap("OK".getBytes()));
         }
