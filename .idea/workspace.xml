@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ameliorations/ClientGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ameliorations/ClientGUI.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -416,7 +415,7 @@
       <workItem from="1587218736305" duration="10075000" />
       <workItem from="1589030051246" duration="10408000" />
       <workItem from="1589101929481" duration="12450000" />
-      <workItem from="1589120230413" duration="1267000" />
+      <workItem from="1589120230413" duration="2151000" />
     </task>
     <task id="LOCAL-00001" summary="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé">
       <created>1584557598849</created>
