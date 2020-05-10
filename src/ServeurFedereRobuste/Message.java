@@ -1,13 +1,14 @@
 package ServeurFedereRobuste;
 
-import java.nio.channels.SocketChannel;
 import java.util.Vector;
 
+/** Classe qui définit les messages qui transitent entre clients-serveurs
+ * Le vecteur d'integer sert à l'implémentation de l'algorithme distribué
+ */
 public class Message {
     Vector<Integer> broadcast ;
     String message ;
-    SocketChannel emetteur ;
-    SocketChannel destinataire ;
+
 
     public Message(String message, Vector<Integer> vector) {
         this.broadcast = vector;
