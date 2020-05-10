@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import static java.lang.System.*;
 
+
 /*
  * Serveur pair :
  *   - Attribution d'une horloge vectorielle à chaque message diffusé et à utiliser les informations de causalité dans l'horloge vectorielle
@@ -94,7 +95,8 @@ public class PairsServer {
             System.exit(2);
         }
 
-        broadcast = new Vector<>(nbPairs);
+        broadcast = new Vector<>();
+        broadcast.setSize(nbPairs);
         serverOrder = new Integer[nbPairs];
 
         ServerSocketChannel server = ServerSocketChannel.open();
@@ -106,8 +108,6 @@ public class PairsServer {
         ByteBuffer buffer = ByteBuffer.allocate(128);
 
         Thread.sleep(4000);
-        broadcast.setSize(nbPairs);
-
         initialiserCo();
 
         // Boucle sur le selecteur
@@ -161,11 +161,11 @@ public class PairsServer {
                         continue;
                     }
 
-                    if(message.split(" ")[0].equals("INITIALISER"))
+                    if("INITIALISER".equals(message.split(" ")[0]))
                         traiterInitialiserCo(channel, message);
                     else if (messageServeur(channel)) {
-                        if(message.split(" ")[5].equals("LOGCLIENT"))
-                            traiterLoginServeur(message.split(" ", 6)[5], channel);
+                        if("LOGCLIENT".equals(message.split(" ")[5]))
+                            traiterLoginServeur(message, channel);
                         else
                             traiterMessageServeur(message);
                     }else if (!clientPseudo.containsKey(channel.socket().getPort()))
@@ -201,7 +201,7 @@ public class PairsServer {
             chan.write(ByteBuffer.wrap("ERROR SERVER LOGIN".getBytes()));
             return;
         }
-        String msg = recupererContenuMessage(message);
+        String msg = recupererContenuMessage(message.split(" ", 6)[5]);
         String[] split = msg.split(" ");
         int port = Integer.parseInt(split[1]);
         String pseudo = split[0];
@@ -209,6 +209,9 @@ public class PairsServer {
         clientPseudo.put(port, pseudo);
         clients.add(pseudo) ;
         stateClient.put(port, STATE_MESSAGE) ;
+
+        int numero = Integer.parseInt(message.split(" ")[0]) ;
+        broadcast.set(numero, broadcast.get(numero)+1);
     }
 
     /* Connexion sur les autres serveurs pairs */
@@ -328,9 +331,9 @@ public class PairsServer {
         System.out.println("Je traite messageClient");
 
         // Simulation d'un défaillance sur les serveurs 0 et 1
-        if(numero == 1 || numero == 0){
+        /*if(numero == 1 || numero == 0){
             Thread.sleep(500000);
-        }
+        }*/
         if (verifierMessage(message)) {
             String pseudo = clientPseudo.get(chan.socket().getPort()) ;
             String messageTraite = pseudo + "> " + recupererContenuMessage(message) ;
@@ -375,6 +378,7 @@ public class PairsServer {
         for (int i = 0 ; i < listSocketServeurs.size() ; i++) {
             broadcast.set(i, Math.max(broadcast.get(i), message.broadcast.get(i))) ;
         }
+
         co_delivery(message.message, numero) ;
     }
 
