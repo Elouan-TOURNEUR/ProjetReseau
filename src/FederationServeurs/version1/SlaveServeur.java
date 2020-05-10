@@ -150,14 +150,6 @@ public class SlaveServeur {
     }
     private static void traiterMessage(String entree, SocketChannel chan, Selector select) throws IOException, InterruptedException {
         System.out.println("Je traite un message");
-        /*if(entree.equals("exit")) {
-            supprimerFileAttente(chan);
-        }
-        else if (!verifierMessage(entree)){
-            chan.write(ByteBuffer.wrap("ERROR chatamu".getBytes()));
-            //supprimerFileAttente(chan);
-        }*/
-
 
         String pseudo = entree.split(" ")[0];
         String message = recupererContenuMessage(entree);
@@ -167,7 +159,6 @@ public class SlaveServeur {
         } else {
             String messageTraite = pseudo + "> " + recupererContenuMessage(message);
             //ajouterListes(messageTraite, portSocket);
-            System.out.println(messageTraite);
 
             /* Que sur les autres files*/
             String messageRetourne = name + " " + messageTraite;

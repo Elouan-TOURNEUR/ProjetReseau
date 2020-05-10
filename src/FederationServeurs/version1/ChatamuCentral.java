@@ -95,6 +95,7 @@ class MasterRecup implements Runnable{
                 Iterator<SelectionKey> keys = select.selectedKeys().iterator();
 
                 while (keys.hasNext()) {
+                    // Gestion du temps avec pause du thread
                     /*if (System.nanoTime()/1000000000 - timeReferant/1000000000 > 180)
                         return ;
                     if (System.nanoTime()/1000000000 - time/1000000000 > 15) {
@@ -264,7 +265,6 @@ class MasterRecup implements Runnable{
                     continue;
                 else {
                     SocketChannel ServeurARepliquer = serveursNames.get(serveur) ;
-                    //System.out.println(ServeurARepliquer.toString());
                     master.add(ServeurARepliquer) ;
                     master.add(messageTraite) ;
                 }
@@ -273,9 +273,7 @@ class MasterRecup implements Runnable{
         else {
             System.out.println("Message : " + entree);
             String message = recupererContenuMessage(entree) ;
-            //System.out.println(entree);
             SocketChannel client = pseudoChannel.get(entree.split(" ")[0]) ;
-            //.out.println(client.toString());
 
             master.add(client) ;
             master.add(message) ;
@@ -292,26 +290,9 @@ class MasterRecup implements Runnable{
         SocketChannel dest = serveursNames.get(nomSalon) ;
 
         // On transmet d'abord les infos concernant le client au serveur
-
         // On transmet ensuite au serveur le message du client
         master.add(dest) ;
         master.add(messagetraite) ;
-    }
-
-
-    private static void traiterMessageSalon(String entree, SocketChannel chan, Selector select) throws IOException {
-        int portSocket = chan.socket().getPort();
-        String pseudo = clientPseudo.get(portSocket);
-        // On recupere le salon auquel le client est connecté
-        String nomSalon = trouverSalonClient(chan) ;
-        String message = pseudo + entree ;
-        SocketChannel dest = serveursNames.get(nomSalon) ;
-
-        // On transmet d'abord les infos concernant le client au serveur
-
-        // On transmet ensuite au serveur le message du client
-        master.add(dest) ;
-        master.add(message) ;
     }
 
     private static boolean verifierServeur(String name) {

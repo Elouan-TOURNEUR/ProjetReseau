@@ -18,13 +18,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 * recevant et envoyant les messages entre les clients.
 */
 public class ChatamuCentral {
-    /*
-    Proposer une architecture à base de files d'attente (https://docs.oracle.com/javase/8/docs/api/java/util/Queue.html) associées à chaque client, permettant de
-    utiliser ces files en mode producteurs-consommateur
-    où les producteurs transmettent les messages envoyés par un client sur l'ensemble des autres files d'attentes
-    il y a un seul consommateur par file, qui renvoie dans la socket du client les messages présents dans la file d'attente associée à ce client donné.
-            - On pourra utiliser les implémentations ArrayBlockingQueue<String> ou ConcurrentLinkedQueue<String>.
-    */
 
     /* Map qui associe un port client à un pseudo */
     private static HashMap<Integer, String> map = new HashMap<>();
