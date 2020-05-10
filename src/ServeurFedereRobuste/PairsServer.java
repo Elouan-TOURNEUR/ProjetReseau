@@ -9,22 +9,73 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import static java.lang.System.*;
 
 /*
- -  attribuer une horloge vectorielle à chaque message diffusé et à utiliser les informations de causalité dans l'horloge vectorielle
-  pour décider à chaque destination quand un message peut être délivré
- - Si un message arrive à une destination donnée avant que les messages précédents causalement aient été remis, le service retarde la
- livraison de ce message jusqu'à ce que ces messages arrivent et soient remis
- - méthode co_broadcast() envoie à tout le monde
- - méthode co_deliver() réception du message et traitement
+ * Serveur pair :
+ *   - Attribution d'une horloge vectorielle à chaque message diffusé et à utiliser les informations de causalité dans l'horloge vectorielle
+ *     pour décider à chaque destination quand un message peut être délivré.
+ *   - Si un message arrive à une destination donnée avant que les messages précédents causalement aient été remis, le service retarde la
+ *     livraison de ce message jusqu'à ce que ces messages arrivent et soient remis
+ *   - Méthode co_broadcast() envoie à tout le monde
+ *   - Méthode co_deliver() réception du message et traitement
  */
-
 public class PairsServer {
+
+    /* Nom du serveur */
     public static String name = null;
+
+    /* Port du serveur */
     public static Integer port = null;
+
+    /* IP du serveur */
     private static String ip = "127.0.0.1";
+
+    /* Nombre de parires du serveur robuste */
     public static Integer nbPairs = null ;
+
+    /* Numéro du serveur */
     public static Integer numero = null ;
 
-    public static void main(String[] args) throws IOException {
+    /* Etat distinguant l'état d'un client pouvant écrire un message */
+    private static int STATE_MESSAGE = 2 ;
+
+    /* Liste des Socket des serveurs pairs */
+    public static List<SocketChannel> listSocketServeurs = new ArrayList<>();
+
+    /* Liste des pseudos connectés à la fédération de serveurs */
+    public static List<String> clients = new ArrayList<>();
+
+    /* Liste des noms des serveurs disponibles */
+    private static List<String> serveursDisponnibles = new ArrayList<>() ;
+
+    /* Map associant le port d'un client avec le pseudo qu'il a choisi */
+    public static HashMap<Integer, String> clientPseudo = new HashMap<>();
+
+    /* Map associant le pseudo d'un client avec son Socket */
+    public static volatile HashMap<String, SocketChannel> clientSocket = new HashMap<>();
+
+    /* Map associant le nom d'un serveur avec son Socket*/
+    public static HashMap<String, SocketChannel> serveursNames = new HashMap<>();
+
+    /* Tableau de l'ordre des ports des serveurs */
+    public static Integer[] serverOrder;
+
+    /* Liste des messages et de leur origine */
+    public static ConcurrentLinkedQueue pair = new ConcurrentLinkedQueue() ;
+
+    /* Socket vers le serveur pair courant */
+    private static SocketChannel client;
+
+    /* Map assicant les port des clients avec leur état (STATE_MESSAGE ou rien) */
+    public static HashMap<Integer, Integer> stateClient = new HashMap<>() ;
+
+    /* Horloge vectorielle */
+    private static Vector<Integer> broadcast;
+
+    /* Socket vers les autres serveurs */
+    private static SocketChannel[] socketCoServer = new SocketChannel[2] ;
+
+
+
+    public static void main(String[] args) throws IOException, InterruptedException {
         int argc = args.length;
 
         /* Traitement des arguments */
@@ -42,159 +93,110 @@ public class PairsServer {
             System.out.println("Usage: java EchoServer port");
             System.exit(2);
         }
-        ServerSocketChannel ssc = ServerSocketChannel.open();
-        ssc.socket().bind(new InetSocketAddress(port));
 
+        broadcast = new Vector<>(nbPairs);
+        serverOrder = new Integer[nbPairs];
 
-        Thread threadRead = new Thread(new PairRecup(ssc));
-        Thread threadWrite = new Thread(new PairReturn(ssc));
-        threadRead.start();
-        threadWrite.start();
-    }
-}
+        ServerSocketChannel server = ServerSocketChannel.open();
+        server.socket().bind(new InetSocketAddress(port));
 
-class PairRecup implements Runnable {
-    private ServerSocketChannel server;
+        server.configureBlocking(false);
+        Selector select = Selector.open();
+        server.register(select, SelectionKey.OP_ACCEPT);
+        ByteBuffer buffer = ByteBuffer.allocate(128);
 
-    public PairRecup(ServerSocketChannel server) {
-        this.server = server;
-    }
+        Thread.sleep(4000);
+        broadcast.setSize(nbPairs);
 
-    public void run() {
-        try {
-            server.configureBlocking(false);
-            Selector select = Selector.open();
-            server.register(select, SelectionKey.OP_ACCEPT);
-            ByteBuffer buffer = ByteBuffer.allocate(128);
-            while (true) {
-                select.select();
-                Iterator<SelectionKey> keys = select.selectedKeys().iterator();
-                while (keys.hasNext()) {
-                    SelectionKey key = keys.next();
+        initialiserCo();
 
-                    if (key.isReadable()) {
-                        SocketChannel chan = (SocketChannel) key.channel();
-                        chan.configureBlocking(false);
+        // Boucle sur le selecteur
+        while (true) {
+            select.select();
+            Iterator<SelectionKey> keys = select.selectedKeys().iterator();
+            while (keys.hasNext()) {
+                SelectionKey key = keys.next();
 
-                        try {
-                            chan.read(buffer);
-                        } catch (IOException e) {
-                            chan.close();
-                            break;
-                        }
-                        ByteBuffer msg = buffer.flip();
-                        String entree = new String(msg.array()).trim();
-                        traiterInformation(entree, chan);
-                        buffer = ByteBuffer.allocate(128);
+                if (key.isReadable()) {
+                    SocketChannel chan = (SocketChannel) key.channel();
+                    chan.configureBlocking(false);
 
-                    } else if (key.isAcceptable()) {
-                        SocketChannel csc = server.accept();
-                        csc.configureBlocking(false);
-                        csc.register(select, SelectionKey.OP_READ);
-
-                        int port = csc.socket().getPort();
-                        if(PairReturn.stateClient.containsKey(port)){
-                            PairReturn.clientSocket.put(PairReturn.clientPseudo.get(port), csc);
-                        }
+                    try {
+                        chan.read(buffer);
+                    } catch (IOException e) {
+                        chan.close();
+                        break;
                     }
-                    keys.remove();
+                    ByteBuffer msg = buffer.flip();
+                    String entree = new String(msg.array()).trim();
+                    traiterInformation(entree, chan);
+                    buffer = ByteBuffer.allocate(128);
+
+                    chan.register(select, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+
+                } else if (key.isAcceptable()) {
+                    SocketChannel csc = server.accept();
+                    csc.configureBlocking(false);
+
+                    csc.register(select, SelectionKey.OP_READ);
+
+                    int port = csc.socket().getPort();
+                    if(stateClient.containsKey(port)){
+                        clientSocket.put(clientPseudo.get(port), csc);
+                    }
+                } else if(key.isWritable()){
+                    SocketChannel chan = (SocketChannel) key.channel();
+                    chan.configureBlocking(false);
+
+                    if(pair.isEmpty()) {
+                        chan.register(select, SelectionKey.OP_READ);
+                        continue;
+                    }
+
+                    SocketChannel channel = (SocketChannel) pair.poll();
+                    String message = (String) pair.poll();
+
+                    if(message == null){
+                        chan.register(select, SelectionKey.OP_READ);
+                        continue;
+                    }
+
+                    if(message.split(" ")[0].equals("INITIALISER"))
+                        traiterInitialiserCo(channel, message);
+                    else if (messageServeur(channel)) {
+                        if(message.split(" ")[5].equals("LOGCLIENT"))
+                            traiterLoginServeur(message.split(" ", 6)[5], channel);
+                        else
+                            traiterMessageServeur(message);
+                    }else if (!clientPseudo.containsKey(channel.socket().getPort()))
+                        traiterLogin(message, channel);
+                    else if (STATE_MESSAGE == stateClient.get(channel.socket().getPort()))
+                        traiterMessageClient(message, channel);
+                    else if(message.equals("DISCONNECT"))
+                        traiterDisconnectClient(channel);
+
+                    chan.register(select, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
                 }
+
+                keys.remove();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
-    private void traiterInformation(String entree, SocketChannel chan) {
-        PairReturn.pair.add(chan);
-        PairReturn.pair.add(entree);
-    }
-}
-
-class PairReturn implements Runnable{
-    private static int STATE_MESSAGE = 2 ;
-    private static int STATE_SERVERCONNECT = 1 ;
-
-    /* Liste qui contient toutes les socketsChannels */
-    public static List<SocketChannel> listeSocketClients = new ArrayList<>();
-    public static List<SocketChannel> listSocketServeurs = new ArrayList<>();
-
-
-    public static List<String> clients = new ArrayList<>();
-    private static List<String> serveursDisponnibles = new ArrayList<>() ;
-
-
-    public static HashMap<Integer, String> clientPseudo = new HashMap<>();
-
-    public static volatile HashMap<String, SocketChannel> clientSocket = new HashMap<>();
-    public static HashMap<String, SocketChannel> serveursNames = new HashMap<>();
-
-    public static HashMap<SocketChannel, Integer> socketChannelServerPort = new HashMap<>();
-
-
-
-    public static Integer[] serverOrder = new Integer[PairsServer.nbPairs];
-
-    public static ConcurrentLinkedQueue pair = new ConcurrentLinkedQueue() ;
-
-    private ServerSocketChannel server;
-    private static SocketChannel client;
-
-    //                   n° PORT | STATE
-    public static HashMap<Integer, Integer> stateClient = new HashMap<>() ;
-
-    private static Vector<Integer> broadcast = new Vector<>(PairsServer.nbPairs);
-
-    private static SocketChannel[] socketCoServer = new SocketChannel[2] ;
-
-
-
-    public PairReturn(ServerSocketChannel server){
-        this.server = server;
+    /* Ajout du message et de la Socket dans la liste du thread PairReturn */
+    private static void traiterInformation(String entree, SocketChannel chan) {
+        pair.add(chan);
+        pair.add(entree);
     }
 
-    @Override
-    public void run() {
-        try {
-            Thread.sleep(4000);
-            broadcast.setSize(PairsServer.nbPairs);
-
-            initialiserCo() ;
-            while (true) {
-                Thread.sleep(10);
-                if(pair.isEmpty())
-                    continue;
-                SocketChannel chan = (SocketChannel) pair.poll();
-                String message = (String) pair.poll();
-                if(message == null) continue;
-
-                if(message.split(" ")[0].equals("INITIALISER"))
-                    traiterInitialiserCo(chan, message);
-                else if (messageServeur(chan)) {
-                    if(message.split(" ")[5].equals("LOGCLIENT"))
-                        traiterLoginServeur(message.split(" ", 6)[5], chan);
-                    else
-                        traiterMessageServeur(chan, message);
-                }else if (!clientPseudo.containsKey(chan.socket().getPort()))
-                    traiterLogin(message, chan);
-                else if (STATE_MESSAGE == stateClient.get(chan.socket().getPort()))
-                    traiterMessageClient(message, chan);
-                else if(message.equals("DISCONNECT"))
-                    traiterDisconnectClient(chan);
-            }
-        } catch (InterruptedException | IOException e) {
-            e.printStackTrace();
-        }
-        System.err.println("Fin de la session.");
-        exit(0);
-    }
-
-    private void traiterDisconnectClient(SocketChannel chan) throws IOException {
+    /* Traitement de la déconnexion d'un client */
+    private static void traiterDisconnectClient(SocketChannel chan) throws IOException {
         clientSocket.remove(clientPseudo.get(chan.socket().getPort()));
         chan.close();
     }
 
-    private void traiterLoginServeur(String message, SocketChannel chan) throws IOException {
+    /* Traitement du LOGIN sur la fédération de serveur */
+    private static void traiterLoginServeur(String message, SocketChannel chan) throws IOException {
         if(!serveursNames.containsValue(chan)){
             chan.write(ByteBuffer.wrap("ERROR SERVER LOGIN".getBytes()));
             return;
@@ -205,15 +207,15 @@ class PairReturn implements Runnable{
         String pseudo = split[0];
 
         clientPseudo.put(port, pseudo);
-        //clientSocket.put(pseudo, chan) ;
         clients.add(pseudo) ;
         stateClient.put(port, STATE_MESSAGE) ;
     }
 
+    /* Connexion sur les autres serveurs pairs */
     private static void initialiserCo() throws IOException {
         Integer port = 12339 ;
-        Integer indice_socketCoServer = 0 ;
-        for (int i = 0; i < PairsServer.nbPairs; i++) {
+        int indice_socketCoServer = 0 ;
+        for (int i = 0; i < nbPairs; i++) {
             ++port ;
             serverOrder[i] = port ;
             broadcast.set(i, 0) ;
@@ -224,74 +226,60 @@ class PairReturn implements Runnable{
             client = SocketChannel.open(new InetSocketAddress("127.0.0.1", port));
             socketCoServer[indice_socketCoServer] = client ;
             ++indice_socketCoServer ;
-            String messageReady = "INITIALISER " + PairsServer.name ;
+            String messageReady = "INITIALISER " + name ;
             client.write(ByteBuffer.wrap(messageReady.getBytes()));
         }
     }
 
+    /* Réception de la connexion des autres serveurs pairs */
     private static void traiterInitialiserCo(SocketChannel chan, String message) {
         String nom = recupererContenuMessage(message) ;
-        Integer port = chan.socket().getLocalPort() ;
         serveursNames.put(nom, chan) ;
         listSocketServeurs.add(chan) ;
         serveursDisponnibles.add(nom) ;
     }
 
-    private static boolean verifierServeur(String name) {
-        for(String salon : serveursDisponnibles){
-            if (salon.equals(name))
-                return true ;
-        }
-        return false ;
+
+    private static boolean messageServeur(SocketChannel chan) {
+        return listSocketServeurs.contains(chan);
     }
 
-    private boolean messageServeur(SocketChannel chan) {
-        for (SocketChannel socketChannel : listSocketServeurs){
-            if (chan.equals(socketChannel))
-                return true ;
-        }
-        return false ;
-    }
-
-    private void traiterMessageServeur(SocketChannel chan, String message) throws IOException, InterruptedException {
+    /* Traitement d'un message venant d'un serveur */
+    private static void traiterMessageServeur(String message) throws InterruptedException {
         System.out.println("Je traite messageServer");
         int numero = Integer.parseInt(message.split(" ")[0]) ;
         String stringVector = message.split(" ")[1] + message.split(" ")[2] + message.split(" ")[3] ;
         String[] entrees = message.split(" ", 5);
         String messageString = entrees[4];
         System.out.println(stringVector);
-        Vector<Integer> vector = new Vector<>(PairsServer.nbPairs) ;
-        vector.setSize(PairsServer.nbPairs);
+        Vector<Integer> vector = new Vector<>(nbPairs) ;
+        vector.setSize(nbPairs);
         int indice = 1 ;
         String str ;
-        for (int i = 0; i < PairsServer.nbPairs ; i++) {
+        for (int i = 0; i < nbPairs ; i++) {
             str = Character.toString(stringVector.charAt(indice)) ;
             indice = indice + 2 ;
             vector.set(i, Integer.parseInt(str)) ;
         }
 
         Message messageObjet = new Message(messageString, vector) ;
-        receive_co_broadcast(messageObjet, chan, numero);
+        receive_co_broadcast(messageObjet, numero);
     }
 
-
-    private void receive_co_broadcast(Message message, SocketChannel channel, int numero) throws IOException, InterruptedException {
+    private static void receive_co_broadcast(Message message, int numero) throws InterruptedException {
         System.out.println("Je traite receive co_broadcast");
         if (!traitementPossible(message)){
-            /*String envoi = PairsServer.numero.toString() + " " + message.broadcast.toString() + " " + message.message ;
-            pair.add(channel) ;
-            pair.add(envoi) ;*/
             System.out.println("Pas le moment.");
         }
         else {
             co_delivery(message.message, numero);
         }
         /**for (int i = 0 ; i < listSocketServeurs.size() ; i++) {
-            broadcast.set(i, Math.max(broadcast.get(i), message.broadcast.get(i))) ;
-        }**/
+         broadcast.set(i, Math.max(broadcast.get(i), message.broadcast.get(i))) ;
+         }**/
     }
 
-    private boolean traitementPossible(Message message) {
+    private static boolean traitementPossible(Message message) {
         for (int i = 0; i < message.broadcast.size(); i++) {
             if (message.broadcast.get(i) > broadcast.get(i))
                 return false ;
@@ -299,33 +287,48 @@ class PairReturn implements Runnable{
         return true ;
     }
 
-    private void co_delivery(String message, int numero) throws InterruptedException {
+    private static void co_delivery(String message, int numero) throws InterruptedException {
         System.out.println("Je traite Co_delivery");
         broadcast.set(numero, broadcast.get(numero)+1) ;
 
         System.out.println(message);
-        //for (String c : clients) {
+        boolean isServerMsg = message.split(" ")[0].equals("SERVER");
         for (String c : clientSocket.keySet()) {
             Thread.sleep(10);
             SocketChannel chan = clientSocket.get(c);
             try {
                 if (chan.isConnected()) {
-                    boolean isServerMsg = message.split(" ")[0].equals("SERVER");
-                    if(!isServerMsg || serveursNames.containsValue(chan)){
+                    if(!isServerMsg){
                         out.println("j'envoie " + message + " à " + c);
-                        out.println(clientPseudo.get(chan.socket().getPort()));
                         chan.write(ByteBuffer.wrap(message.getBytes()));
                     }
                 }
             } catch (IOException e) {
+                e.printStackTrace();
+                continue;
+            }
+        }
+        for (String c : serveursNames.keySet()) {
+            Thread.sleep(10);
+            SocketChannel chan = serveursNames.get(c);
+            try {
+                if (chan.isConnected()) {
+                    out.println("j'envoie " + message + " à " + c);
+                    chan.write(ByteBuffer.wrap(message.getBytes()));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
                 continue;
             }
         }
     }
 
-    private void traiterMessageClient(String message, SocketChannel chan) throws IOException, InterruptedException {
+    /* Traitement du message d'un client connecté sur ce serveur */
+    private static void traiterMessageClient(String message, SocketChannel chan) throws IOException, InterruptedException {
         System.out.println("Je traite messageClient");
-        if(PairsServer.numero == 1 || PairsServer.numero == 0){
+
+        // Simulation d'un défaillance sur les serveurs 0 et 1
+        if(numero == 1 || numero == 0){
             Thread.sleep(500000);
         }
         if (verifierMessage(message)) {
@@ -339,35 +342,25 @@ class PairReturn implements Runnable{
             String messageErreur = "ERROR chatamu";
             chan.write(ByteBuffer.wrap(messageErreur.getBytes()));
         }
-
     }
 
     private static boolean verifierMessage(String entree){
         return (entree.split(" ")[0].equals("MESSAGE"));
     }
 
-
-    private void co_broadcast(Message message) throws IOException, InterruptedException {
+    /* Envoie du message à tout le monde */
+    private static void co_broadcast(Message message) throws InterruptedException {
         System.out.println("Je traite co_broadcast");
-
-        /*
-        pour chaque autre serveur, on envoie CO_BR(message, vector[1..nbServeur])
-        vector[i] = vector[i] + 1
-        appelle co_delivery(message) pour le traiter sur ce serveur
-        quand serveur reçoit CO_BR(message, vector[1..nbServeur])
-        on attend que tous les indices du vecteur sont remplis
-        vector[i] = vector[i] + 1
-         */
 
         Integer port = 12339 ;
         Integer indice_socketCoServeur = 0 ;
-        String envoi = PairsServer.numero.toString() + " " + message.broadcast.toString() + " " + message.message ;
-        for (int i = 0; i < PairsServer.nbPairs; i++) {
+        String envoi = numero.toString() + " " + message.broadcast.toString() + " " + message.message ;
+        for (int i = 0; i < nbPairs; i++) {
             ++port ;
             if (port.equals(PairsServer.port)){
                 continue;
             }
-            System.out.println("j'envoi un message chez " + port);
+            System.out.println("j'envoie un message chez " + port);
             client = socketCoServer[indice_socketCoServeur];
             ++indice_socketCoServeur ;
 
@@ -382,12 +375,11 @@ class PairReturn implements Runnable{
         for (int i = 0 ; i < listSocketServeurs.size() ; i++) {
             broadcast.set(i, Math.max(broadcast.get(i), message.broadcast.get(i))) ;
         }
-        co_delivery(message.message, PairsServer.numero) ;
+        co_delivery(message.message, numero) ;
     }
 
-
-
-    private void traiterLogin(String entree, SocketChannel chan) throws IOException, InterruptedException {
+    /* Traitement du login */
+    private static void traiterLogin(String entree, SocketChannel chan) throws IOException, InterruptedException {
         System.out.println("Je traite login");
         if(!verifierConnexion(entree)){
             if (chan.isConnected())
@@ -408,7 +400,7 @@ class PairReturn implements Runnable{
             clientSocket.put(pseudo, chan) ;
             clients.add(pseudo) ;
             stateClient.put(chan.socket().getPort(), STATE_MESSAGE) ;
-            chan.write(ByteBuffer.wrap("ok".getBytes())) ;
+            chan.write(ByteBuffer.wrap("OK".getBytes())) ;
 
             String brdcst = "SERVER LOGCLIENT " + pseudo + " " + portSocket;
             co_broadcast(new Message(brdcst, broadcast));
@@ -436,10 +428,5 @@ class PairReturn implements Runnable{
     private static String recupererContenuMessage(String entree){
         String[] entrees = entree.split(" ", 2);
         return entrees[1];
-    }
-
-    private static void fermerServer(SocketChannel client) throws IOException {
-        String messageFermeture = "CLOSE " + PairsServer.name ;
-        client.write(ByteBuffer.wrap(messageFermeture.getBytes()));
     }
 }

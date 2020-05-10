@@ -3,16 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ameliorations/ClientGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ameliorations/ClientGUI.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Ameliorations/ServeurFedereRobuste/Message.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ameliorations/ServeurFedereRobuste/Message.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Ameliorations/ServeurFedereRobuste/PairsClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ameliorations/ServeurFedereRobuste/PairsClient.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Ameliorations/ServeurFedereRobuste/PairsServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ameliorations/ServeurFedereRobuste/PairsServer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FederationServeurs/version2/ChatamuCentral.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FederationServeurs/version2/ChatamuCentral.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FederationServeurs/version2/EchoClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FederationServeurs/version2/EchoClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FederationServeurs/version2/SlaveServeur.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FederationServeurs/version2/SlaveServeur.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ServiceCentralise/ChatamuCentral.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ServiceCentralise/ChatamuCentral.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ServiceCentralise/EchoClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ServiceCentralise/EchoClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ServiceCentralise/SalonCentral.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ServiceCentralise/SalonCentral.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ServeurFedereRobuste/Message.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ServeurFedereRobuste/Message.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsServer.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -37,7 +33,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../Projet Reseaux ref/ProjetReseau" />
     <property name="restartRequiresConfirmation" value="false" />
   </component>
   <component name="RunDashboard">
@@ -418,7 +414,8 @@
       <workItem from="1587042946413" duration="2669000" />
       <workItem from="1587131062199" duration="22284000" />
       <workItem from="1587218736305" duration="10075000" />
-      <workItem from="1589030051246" duration="10312000" />
+      <workItem from="1589030051246" duration="10408000" />
+      <workItem from="1589101929481" duration="5190000" />
     </task>
     <task id="LOCAL-00001" summary="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé">
       <created>1584557598849</created>

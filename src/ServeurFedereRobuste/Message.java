@@ -3,6 +3,7 @@ package ServeurFedereRobuste;
 import java.nio.channels.SocketChannel;
 import java.util.Vector;
 
+/* Classe associant un message et son vecteur */
 public class Message {
     Vector<Integer> broadcast ;
     String message ;
