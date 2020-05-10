@@ -17,7 +17,7 @@ import static java.lang.System.exit;
 /*
 * Bug de temps en temps avec le client qui change de serveur sans raison :
 * Le TimerTask ne s'annule pas à chaque fois.
-* */
+*/
 public class PairsClient {
 
     /* Classe de lecture des messages (Runnable) */
