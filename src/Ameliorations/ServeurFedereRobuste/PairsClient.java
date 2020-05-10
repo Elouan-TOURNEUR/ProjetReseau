@@ -1,32 +1,28 @@
 package Ameliorations.ServeurFedereRobuste;
 
+import java.awt.image.WritableRenderedImage;
 import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.sql.SQLOutput;
 import java.util.Random;
 import java.util.Scanner;
-import static java.lang.System.exit;
 
-/* Client de la fédération de serveur robuste :
-*     - Demande un pseudo à l'utilisateur, et le transmet au serveur
-*     - Attend les messages de l'utilisateur et les transmet au serveur
-*     - Affiche (sur le terminal) les messages reçus du serveur
-*/
+import static java.lang.System.exit;
+import static java.lang.System.setOut;
+
 public class PairsClient {
 
-    /* Classe de lecture des messages (Runnable) */
     public static ReadMessages readMessages;
-
-    /* Classe d'écriture des messages (Runnable) */
     public static WriteMessages writeMessages;
-
-    /* Liste des serveurs */
     public static SocketChannel[] listeClientServer;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        Socket echoSocket; // la socket client
         String ip; // adresse IPv4 du serveur en notation pointée
         int port; // port TCP serveur
+        boolean fini = false;
 
         /* Traitement des arguments */
         if (args.length != 2) {
@@ -70,7 +66,6 @@ public class PairsClient {
         traiterLogin(listeClientServer, buffer);
     }
 
-    /* Demande du login au client */
     public static void traiterLogin(SocketChannel[] clients, ByteBuffer buffer) {
         try {
             String reponseLogin;
@@ -113,22 +108,19 @@ public class PairsClient {
         }
     }
 
-    /* Recherche un autre serveur de manière aléatoire */
+
     public static SocketChannel chercherUnAutreServeur() {
         Random rand = new Random() ;
-        int nbAlea = rand.nextInt(3) ;
-        if (listeClientServer[nbAlea].isConnected()){
-            System.out.println(nbAlea);
-            return listeClientServer[nbAlea] ;
+        int nbAléa = rand.nextInt(3) ;
+        if (listeClientServer[nbAléa].isConnected()){
+            System.out.println(nbAléa);
+            return listeClientServer[nbAléa] ;
         }
         else
             return chercherUnAutreServeur() ;
     }
 }
 
-/*
- * Thread de réception des messages et les affiche
- */
 class ReadMessages implements Runnable{
 
     private volatile SocketChannel client;
@@ -176,9 +168,7 @@ class ReadMessages implements Runnable{
     }
 }
 
-/*
- * Thread de lecture et d'envoie des messages de ce client
- */
+
 class WriteMessages implements Runnable{
 
     private volatile SocketChannel client;
@@ -204,7 +194,6 @@ class WriteMessages implements Runnable{
                 System.out.println("MESSAGE message");
                 entreeMessage = scan.nextLine();
 
-                /* Déconnecte la session et ferme l'application */
                 if(entreeMessage.equals("exit")){
                     System.out.println("c'est la fin j'envoie un dernier message au serveur.");
                     client.write(ByteBuffer.wrap(entreeMessage.getBytes()));
