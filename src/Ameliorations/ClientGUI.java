@@ -32,15 +32,11 @@ public class ClientGUI extends Application {
     /* Correspond à la première fois que l'on change son pseudo : permet de savoir si l'on change de scène ou non */
     private static boolean first;
 
-    /**/
-    public static boolean changePseudo;
-
 
     public static void main(String[] args) {
         String ip;
         int port;
         first = true;
-        changePseudo = false;
 
         /* Traitement des arguments */
         if (args.length != 2) {
@@ -92,30 +88,6 @@ public class ClientGUI extends Application {
         this.stage.show();
     }
 
-
-    /*private GridPane handleServ() throws IOException {
-        this.info = "Choisissez un serveur :";
-        GridPane view = new GridPane();
-        view.add(new Text(this.info), 1, 0, 1, 1);
-        view.setMinSize(400, 400);
-        view.setPadding(new Insets(25));
-        view.setHgap(100);
-        view.setVgap(30);
-
-        List<String> lConf = Files.readAllLines(new File("./src/pairs.cfg").toPath());
-
-        int line = 3;
-
-        for(String conf : lConf){
-            String txt = conf.split(" =")[0];
-            Button button = new Button(txt);
-            view.add(button, 1, line++, 1, 1);
-            button.setOnMouseClicked(mouseEvent -> info = connect(txt));
-        }
-
-        return view;
-    }*/
-
     /* Change de vue pour le login */
     private GridPane handleLogin(){
         GridPane view = new GridPane();
@@ -140,6 +112,7 @@ public class ClientGUI extends Application {
     /* Change du vue pour le chat */
     private GridPane handleMainPane(){
         GridPane view = new GridPane();
+        this.info = "Connecté";
         view.add(new Text(this.info), 1,0,1,1);
         view.setMinSize(400, 400);
         view.setPadding(new Insets(25));
@@ -154,20 +127,6 @@ public class ClientGUI extends Application {
         view.add(messages, 1,1,2,1);
         TextField messageCl = new TextField();
         view.add(messageCl,1,2,2,1);
-
-        TextField loginField = new TextField();
-        loginField.setOnAction(actionEvent -> {
-            login(loginField.getText());
-            changePseudo = true;
-        });
-        view.add(loginField,1,0,1,1);
-
-        Button button = new Button("Valider");
-        button.setOnMouseClicked(actionEvent -> {
-            login(loginField.getText());
-            changePseudo = true;
-        });
-        view.add(button, 2, 0, 1, 1);
 
         ByteBuffer buffer = ByteBuffer.allocate(128);
         messageCl.setOnAction(acctionEvent -> {
@@ -195,40 +154,8 @@ public class ClientGUI extends Application {
         Thread threadRead = new Thread(new ReadGUIMessages(messages));
         threadRead.start();
 
-
         return view;
     }
-
-
-    /*private String connect(String servName) {
-        ByteBuffer buffer = ByteBuffer.allocate(128);
-        String response = null;
-        try {
-            String entreeServerConnect = "SERVERCONNECT " + servName;
-            System.out.println(entreeServerConnect);
-            client.write(ByteBuffer.wrap(entreeServerConnect.getBytes()));
-            buffer.clear();
-            client.read(buffer);
-
-            response = (buffer != null) ? new String(buffer.array()).trim() : "";
-            if (response.equals("ERROR SERVER")) {
-                response = "Syntaxe invalide.";
-                buffer.clear();
-            } else if (response.equals("ERROR SERVER NAME")) {
-                response = "Serveur invalide.";
-            }
-            else {
-                response = "Vous avez rejoint le server avec succès.";
-                this.changeView(this.handleMainPane());
-            }
-
-        } catch (IOException e) {
-            response = "Erreur E/S socket";
-            e.printStackTrace();
-        }
-
-        return response;
-    }*/
 
     /* Demande du login au client */
     public void login(String pseudo) {

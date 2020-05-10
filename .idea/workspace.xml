@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="4c7bfc03-c620-4061-a0d3-aa1deff051c0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/ServeurFedereRobuste/PairsClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ameliorations/ClientGUI.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ameliorations/ClientGUI.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -43,16 +43,25 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Compound.PairServer">
-    <configuration name="ClientGUI" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Compound.Améliorations GUI">
+    <configuration name="ClientGUI 1" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="Ameliorations.ClientGUI" />
       <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="localhost 12340" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="Ameliorations.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ClientGUI 2" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="Ameliorations.ClientGUI" />
+      <module name="Projet_Reseaux" />
+      <option name="PROGRAM_PARAMETERS" value="localhost 12340" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -276,8 +285,8 @@
       <toRun name="SlaveServeur 2 (FS v1)" type="Application" />
       <toRun name="SlaveServeur 3 (FS v1)" type="Application" />
       <toRun name="EchoClient 1 (FS v1)" type="Application" />
-      <toRun name="EchoClient 3 (FS v1)" type="Application" />
       <toRun name="EchoClient 2 (FS v1)" type="Application" />
+      <toRun name="EchoClient 3 (FS v1)" type="Application" />
       <method v="2" />
     </configuration>
     <configuration name="Fédération simple (v2)" type="CompoundRunConfigurationType">
@@ -314,11 +323,11 @@
       <method v="2" />
     </configuration>
     <configuration default="true" type="CompoundRunConfigurationType">
-      <toRun name="PairServeur 2" type="Application" />
-      <toRun name="ClientGUI 2" type="Application" />
-      <toRun name="ClientGUI 1" type="Application" />
       <toRun name="PairServeur" type="Application" />
+      <toRun name="PairServeur 2" type="Application" />
       <toRun name="PairServeur 3" type="Application" />
+      <toRun name="ClientGUI 1" type="Application" />
+      <toRun name="ClientGUI 2" type="Application" />
       <method v="2" />
     </configuration>
     <list>
@@ -347,7 +356,8 @@
       <item itemvalue="Application.EchoClient 1 (SC)" />
       <item itemvalue="Application.Serveur central (FS v1)" />
       <item itemvalue="Application.Serveur central (FS v2)" />
-      <item itemvalue="Application.ClientGUI" />
+      <item itemvalue="Application.ClientGUI 1" />
+      <item itemvalue="Application.ClientGUI 2" />
       <item itemvalue="Compound.Salon central" />
       <item itemvalue="Compound.Serveur central" />
       <item itemvalue="Compound.Fédération simple (v1)" />
@@ -355,11 +365,6 @@
       <item itemvalue="Compound.PairServer" />
       <item itemvalue="Compound.Améliorations GUI" />
     </list>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Application.ClientGUI" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -411,7 +416,7 @@
       <workItem from="1587218736305" duration="10075000" />
       <workItem from="1589030051246" duration="10408000" />
       <workItem from="1589101929481" duration="12450000" />
-      <workItem from="1589120230413" duration="464000" />
+      <workItem from="1589120230413" duration="1267000" />
     </task>
     <task id="LOCAL-00001" summary="Ajout d'un contrôle sur la disponnibilitée du pseudo&#10;Ajout de la libération du pseudo si exit appelé">
       <created>1584557598849</created>
